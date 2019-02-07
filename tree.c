@@ -3,6 +3,9 @@
 #include <unistd.h>
 #include "structures.h"
 
+double xMax = -1;
+double yMax = -1;
+
 
 TREE *SortLeft(TREE coordinates[], int start, int end, int coord, int level){
     
@@ -19,6 +22,7 @@ TREE *SortLeft(TREE coordinates[], int start, int end, int coord, int level){
             node=(TREE*)malloc(sizeof(TREE));
             node->x=coordinates[median].x;
             node->y=coordinates[median].y;
+            coordinates[median].level = level+1;
             
             printf("left child: (%lf, %lf), depth %d\n", node->x, node->y, level);
 
@@ -51,6 +55,7 @@ TREE *SortRight(TREE coordinates[],int start, int end, int coord, int level){
             node=(TREE*)malloc(sizeof(TREE));
             node->x=coordinates[median].x;
             node->y=coordinates[median].y;
+            coordinates[median].level = level+1;
             
             printf("right child: (%lf, %lf), depth %d\n", node->x, node->y, level);
             
@@ -80,6 +85,7 @@ TREE *CreateTree(TREE coordinates[], int start, int end, int coord) {
     root=(TREE*)malloc(sizeof(TREE));
     root->x=coordinates[median].x;
     root->y=coordinates[median].y;
+    coordinates[median].level = 1;
     
     printf("root: (%lf, %lf)\n", root->x, root->y);
     
@@ -92,4 +98,23 @@ TREE *CreateTree(TREE coordinates[], int start, int end, int coord) {
     }
     
     return(root);
+}
+
+
+void find_maxes(TREE tree[], int size)
+{
+	int i = 0;
+
+	for (i = 0; i < size; i++)
+	{
+		if (tree[i].x > xMax)
+		{
+			xMax = tree[i].x;
+		}
+
+		if (tree[i].y > yMax)
+		{
+			yMax = tree[i].y;
+		}
+	}
 }
