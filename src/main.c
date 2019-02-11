@@ -1,12 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
-#include <math.h>
+#include "main.h"
 
 #include "structures.h"
-#include "ui-scrolled-canvas-skeleton.h"
 
 extern void quicksort (TREE array[], int start, int end, int TREE);
 extern TREE *CreateTree(TREE kd_tree[], int start, int end, int TREE);
@@ -16,7 +10,7 @@ TREE *tree;
 
 int main (int argc, char *argv[]){
     
-	int line_size, bytes, counter, i;
+	int line_size, bytes, counter;
 	FILE *fd;
 	char *numbers=NULL, ch[1];
 	TREE *kd_tree=NULL;
@@ -25,6 +19,9 @@ int main (int argc, char *argv[]){
 	//double distance=0;
 	double distance[counter];
 
+	
+	unsigned long i;
+//
 	if (argc == 1)
 	{
 		printf("There is not a file.\n");
@@ -90,7 +87,93 @@ int main (int argc, char *argv[]){
 
 	treeSize = counter;
 	tree = kd_tree;
-	start_gui();
+//
+
+	HIST_ENTRY **hist_list;
+	char dir[BUFFER_SIZE], command[BUFFER_SIZE];
+	char symbol[BUFFER_SIZE + sizeof(NRM) + sizeof(CYN) + 4];
+	char *text;
+	char *hist_text;
+	int expansion;
+	int result;
+	
+	init_tcl(argv);
+
+	init_readline();
+
+	using_history();
+	while (1)
+	{
+		getcwd(dir, sizeof(dir));
+		sprintf(symbol,CYN"[%s]"NRM": ", dir);
+		text = readline(symbol);
+		if (text != NULL)
+		{
+			expansion = history_expand(text, &hist_text);
+			switch (expansion)
+			{
+				case -1:	// An error occured.
+					printf("Error in history expanding:\n\t%s\n", hist_text);
+					exit(1);
+				case 0:		// Expansion did not take place.
+				case 2:		// Returned line should only be displayed, but not executed.
+					add_history(text);
+					strcpy(command, text);
+					break;
+				case 1:		// Expansion did take place
+					add_history(hist_text);
+					strcpy(command, hist_text);
+					break;
+				default:
+					break;
+			}
+			free(hist_text);
+			// Text is not freed, if I try to free it, it crashes.
+			free(text);
+
+			if (!strcmp(command, "quit"))
+			{
+				clear_history();
+				Tcl_DeleteInterp(interpreter);
+				exit(0);
+			}
+			// Personal history, not the Tcl Command
+			else if (!strcmp(command, "history"))
+			{
+				hist_list = history_list();
+				if (hist_list != NULL)
+				{
+					i = 0;
+					// The history list is NULL terminated
+					while (*(hist_list + i) != NULL)
+					{
+						printf("%ld:\t %s\n", (history_base + i), (*(hist_list + i))->line);
+						i++;
+					}
+				}
+			}
+			else if (!strcmp(command, "start_gui"))
+			{
+				start_gui();
+			}
+			else
+			{
+				// Execute the command
+				result = Tcl_Eval(interpreter, command);
+				
+				if (*Tcl_GetStringResult(interpreter) != '\0')
+				{
+					printf("%s\n", Tcl_GetStringResult(interpreter));
+				}
+
+				if (result == TCL_ERROR)
+				{
+					printf(RED"\tSomething is wrong with the command!\n"NRM);
+				}
+			}
+		}
+		// free(text);
+	}
 
 	// This Part is just the Eucledean distance a point to the stored coordinates //
 

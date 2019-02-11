@@ -1,5 +1,5 @@
 #include "ui-scrolled-canvas-skeleton.h"
-#include "structures.h"
+#include "../structures.h"
 
 GtkWidget *maincanvas_scroll; // scrolled window container for main canvas //
 GtkWidget *maincanvas; // main canvas widget // 
@@ -70,7 +70,7 @@ void draw_shapes()
 {
 	// cairo_text_extents_t te;
 	
-	int i, xi;
+	int i;//, xi;
 	double ratio, xRatio, yRatio;
 	double xMid;
 
@@ -84,7 +84,7 @@ void draw_shapes()
 		{
 			printf("%lf\n", tree[i].x);
 			xMid = (tree[i].x * ratio);
-			xi = i;
+			// xi = i;
 			break;
 		}
 	}
@@ -177,8 +177,8 @@ static void resizemaincanvas(GtkWidget *widget, GdkRectangle *gdkrect, gpointer 
 
 static gboolean maincanvasvscroll(GtkRange *range, GtkScrollType scroll, gdouble value, gpointer data)
 {
-	double maxmaincanvasOy;
-	int ivalue; // calibrated, inter y-offset value, based on vertical scrollbar value //
+	// double maxmaincanvasOy;
+	// int ivalue; // calibrated, inter y-offset value, based on vertical scrollbar value //
 
 	// #ifdef DEBUGMODE
 	{
@@ -188,13 +188,14 @@ static gboolean maincanvasvscroll(GtkRange *range, GtkScrollType scroll, gdouble
 	// #endif  
 
 	// vertical scrollbar code here //
+	return TRUE;
 	
 }
 
 static gboolean maincanvashscroll(GtkRange *range, GtkScrollType scroll, gdouble value, gpointer data)
 {
-	double maxmaincanvasOx;
-	int ivalue; // calibrated, inter x-offset value, based on horizontal scrollbar value //
+	// double maxmaincanvasOx;
+	// int ivalue; // calibrated, inter x-offset value, based on horizontal scrollbar value //
 
 	// #ifdef DEBUGMODE
 	{
@@ -204,7 +205,7 @@ static gboolean maincanvashscroll(GtkRange *range, GtkScrollType scroll, gdouble
 	// #endif  
 
 	// horizontal scrollbar code here //
-
+	return TRUE;
 }
 
 static void scroll(GtkWidget *widget, GdkEventScroll *eev, gpointer data)
@@ -266,7 +267,7 @@ void start_gui()
 	GtkWidget *maincanvasvbox; // contains maincanvashbox and horizontal scrollbar //
 
 	GtkWidget *hpane; // horizontal pane //
-	GtkWidget *hpane2; // horizontal pane //
+	// GtkWidget *hpane2; // horizontal pane //
 
 	GtkWidget *mainframe; // main canvas frame //
 	GtkWidget *hierarchybrowserframe; // hierarchy browser frame //

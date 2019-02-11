@@ -1,17 +1,58 @@
-knn: main.o quicksort.o tree.o ui.o
-	gcc -Wall -g`pkg-config --cflags gtk+-2.0` `pkg-config --cflags gthread-2.0` main.o quicksort.o tree.o ui.o -o $@ -lm `pkg-config --libs gtk+-2.0` `pkg-config --libs gthread-2.0`
+# Compiler and compiler flags #
+CC = gcc
+CFLAGS = -g -Wall
 
-main.o:
-	gcc -c -Wall -g `pkg-config --cflags gtk+-2.0` `pkg-config --cflags gthread-2.0` main.c -o $@ -lm `pkg-config --libs gtk+-2.0` `pkg-config --libs gthread-2.0`
+# Link Libraries #
+MATH = -lm
+TCL = -ltcl
+READLINE = -lreadline
 
-quicksort.o:
-	gcc -c -Wall -g quicksort.c -o $@
+# Headers #
+EXEC_HEADER =
+HEADER =
+GUI_HEADER = `pkg-config --cflags gtk+-2.0` `pkg-config --cflags gthread-2.0`
 
-tree.o:
-	gcc -c -Wall -g tree.c -o $@
+# Footers #
+EXEC_FOOTER =
+FOOTER =
+GUI_FOOTER = `pkg-config --libs gtk+-2.0` `pkg-config --libs gthread-2.0`
 
-ui.o:
-	gcc -c -Wall -g `pkg-config --cflags gtk+-2.0` `pkg-config --cflags gthread-2.0` ui-scrolled-canvas-skeleton.c -o $@ -lm `pkg-config --libs gtk+-2.0` `pkg-config --libs gthread-2.0`
+# Objects #
+OBJ = quicksort.o tree.o ui.o tcl.o readline.o main.o
+
+knn: EXEC_HEADER := $(GUI_HEADER)
+knn: EXEC_FOOTER := $(GUI_FOOTER) $(MATH) $(TCL) $(READLINE)
+knn: $(OBJ)
+	$(CC) $(CFLAGS) $(EXEC_HEADER) $^ -o $@ $(EXEC_FOOTER)
+
+main.o: CFLAGS += -c
+main.o: FOOTER := $(TCL) $(READLINE)
+main.o: src/main.c src/main.h
+	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
+
+quicksort.o: CFLAGS += -c
+quicksort.o: src/quicksort.c
+	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
+
+tree.o: CFLAGS += -c
+tree.o: src/tree.c
+	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
+
+tcl.o: CFLAGS += -c
+tcl.o: FOOTER := $(TCL)
+tcl.o: src/tcl/tcl.c src/tcl/tcl.h
+	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
+
+readline.o: CFLAGS += -c
+readline.o: FOOTER := $(READLINE)
+readline.o: src/readline/readline.c src/readline/readline.h
+	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
+
+ui.o: CFLAGS += -c
+ui.o: HEADER := $(GUI_HEADER)
+ui.o: FOOTER := $(GUI_FOOTER)
+ui.o: src/ui/ui-scrolled-canvas-skeleton.c src/ui/ui-scrolled-canvas-skeleton.h
+	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
 .PHONY: clean clean_objects new
 
