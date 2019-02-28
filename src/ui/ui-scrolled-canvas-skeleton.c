@@ -1,5 +1,5 @@
 #include "ui-scrolled-canvas-skeleton.h"
-#include "../structures.h"
+#include "../tree/tree.h"
 
 GtkWidget *maincanvas_scroll; // scrolled window container for main canvas //
 GtkWidget *maincanvas; // main canvas widget // 

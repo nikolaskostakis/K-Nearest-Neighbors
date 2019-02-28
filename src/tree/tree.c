@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include "structures.h"
+#include "tree.h"
 
 double xMax = -1;
 double yMax = -1;

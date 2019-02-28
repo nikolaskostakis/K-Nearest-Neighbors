@@ -22,7 +22,7 @@ char *commands[] = {
 	"tm", "trace", "transchan", "try", "unknown", "unload", "unset", "update", "uplevel", "upvar",
 	"variable", "vwait", "while", "yield", "yieldto", "zlib",
 
-	"start_gui",
+	"start_gui", "read_points", 
 
 	NULL
 };

@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "structures.h"
-
+#include "quicksort.h"
 
 void swap (double *x, double *y) {
     double temp;

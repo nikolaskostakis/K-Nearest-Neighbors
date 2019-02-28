@@ -1,3 +1,6 @@
+#ifndef MAIN
+#define MAIN
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,6 +16,14 @@
 extern Tcl_Interp *interpreter;
 
 // External Functions //
+
+// From tcl //
 extern void init_tcl(char *argv[]);
+
+// From readline //
 extern void init_readline();
+
+// From ui //
 extern void start_gui();
+
+#endif

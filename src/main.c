@@ -1,6 +1,6 @@
 #include "main.h"
 
-#include "structures.h"
+#include "tree/tree.h"
 
 extern void quicksort (TREE array[], int start, int end, int TREE);
 extern TREE *CreateTree(TREE kd_tree[], int start, int end, int TREE);
@@ -19,7 +19,7 @@ int main (int argc, char *argv[]){
 	//double distance=0;
 	double distance[counter];
 
-	
+
 	unsigned long i;
 //
 	if (argc == 1)

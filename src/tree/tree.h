@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 /*structure for tree*/
 typedef struct TREE {
 	double x;
@@ -6,12 +10,6 @@ typedef struct TREE {
 	struct TREE *left;
 	struct TREE *right;
 }TREE;
-
-
-/*functions of quicksort*/
-void quicksort (TREE array[], int start, int end, int coord);
-
-void swap (double *x, double *y);
 
 
 /*structures for tree*/

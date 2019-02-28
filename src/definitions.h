@@ -1,3 +1,6 @@
+#ifndef DEFINITIONS
+#define DEFINITIONS
+
 #include <linux/limits.h>
 
 // Print Colors //
@@ -16,3 +19,5 @@
 // Return values //
 #define RETURN_SUCCESS 0
 #define RETURN_FAILURE 1
+
+#endif

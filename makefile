@@ -18,7 +18,7 @@ FOOTER =
 GUI_FOOTER = `pkg-config --libs gtk+-2.0` `pkg-config --libs gthread-2.0`
 
 # Objects #
-OBJ = quicksort.o tree.o ui.o tcl.o readline.o main.o
+OBJ = quicksort.o tree.o ui.o tcl.o readline.o main.o io.o structures.o
 
 knn: EXEC_HEADER := $(GUI_HEADER)
 knn: EXEC_FOOTER := $(GUI_FOOTER) $(MATH) $(TCL) $(READLINE)
@@ -31,11 +31,11 @@ main.o: src/main.c src/main.h
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
 quicksort.o: CFLAGS += -c
-quicksort.o: src/quicksort.c
+quicksort.o: src/quicksort/quicksort.c src/quicksort/quicksort.h
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
 tree.o: CFLAGS += -c
-tree.o: src/tree.c
+tree.o: src/tree/tree.c src/tree/tree.h
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
 tcl.o: CFLAGS += -c
@@ -52,6 +52,14 @@ ui.o: CFLAGS += -c
 ui.o: HEADER := $(GUI_HEADER)
 ui.o: FOOTER := $(GUI_FOOTER)
 ui.o: src/ui/ui-scrolled-canvas-skeleton.c src/ui/ui-scrolled-canvas-skeleton.h
+	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
+
+io.o: CFLAGS += -c
+io.o: src/io/io.c src/io/io.h
+	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
+
+structures.o: CFLAGS += -c
+structures.o: src/structures/structures.c src/structures/structures.h
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
 .PHONY: clean clean_objects new
