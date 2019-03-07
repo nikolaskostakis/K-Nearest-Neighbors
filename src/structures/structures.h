@@ -1,6 +1,7 @@
 #ifndef STRUCTURES
 #define STRUCTURES
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,7 @@
 #include "../definitions.h"
 
 #define MAX_HASH_DEPTH 10
+#define MAX_KDLEAF_ELEMENTS 5
 
 struct pointHashNode
 {
@@ -33,6 +35,7 @@ struct kdNode
 	unsigned long splitIndex;
 	struct kdNode *left;
 	struct kdNode *right;
+	struct kdNode *parent;
 };
 
 
@@ -42,5 +45,20 @@ void rehash_point_hash();
 void free_point_hash();
 void print_point_hash();
 
+int point_x_comparator(const void *p1, const void *p2);
+int point_y_comparator(const void *p1, const void *p2);
+
+void create_sorting_array();
+void free_sorting_array();
+void print_sorting_array();
+
+void create_KD_tree();
+struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startIndex, unsigned long endIndex);
+void free_KD_tree();
+void free_KD_node(struct kdNode *node);
+void print_KD_tree();
+void print_KD_node(struct kdNode *node, int depth);
+
+inline double euclidean_distance(double x1, double y1, double x2, double y2);
 
 #endif

@@ -14,39 +14,26 @@ void parse_points_file(FILE *fp)
 	{
 		// First token - Point Name //
 		token = strtok(line, DELIMITERS);
-		if (token == NULL)
-		{
-			printf(RED"Syntax Error!\n"NRM);
-			exit(1);
-		}
+		assert(token != NULL);
+
 		name = strdup(token);
 
 		// Second token - X-coordinate //
 		token = strtok(NULL, DELIMITERS);
-		if (token == NULL)
-		{
-			printf(RED"Syntax Error!\n"NRM);
-			exit(1);
-		}
+		assert(token != NULL);
+
 		x = atof(token);
 
 		// Third token - Y-coordinate //
 		token = strtok(NULL, DELIMITERS);
-		if (token == NULL)
-		{
-			printf(RED"Syntax Error!\n"NRM);
-			exit(1);
-		}
+		assert(token != NULL);
+
 		y = atof(token);
 
 		// Syntax checking //
 		token = strtok(NULL, DELIMITERS);
-		if (token != NULL)
-		{
-			printf(RED"Syntax Error!\n"NRM);
-			exit(1);
-		}
-
+		assert(token == NULL);
+		
 		// Store point to the hashtable //
 		insert_point(name, x, y);
 	}

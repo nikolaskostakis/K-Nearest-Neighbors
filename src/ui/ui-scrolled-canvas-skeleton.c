@@ -1,5 +1,4 @@
 #include "ui-scrolled-canvas-skeleton.h"
-#include "../tree/tree.h"
 
 GtkWidget *maincanvas_scroll; // scrolled window container for main canvas //
 GtkWidget *maincanvas; // main canvas widget // 
@@ -70,59 +69,59 @@ void draw_shapes()
 {
 	// cairo_text_extents_t te;
 	
-	int i;//, xi;
-	double ratio, xRatio, yRatio;
-	double xMid;
+	// int i;//, xi;
+	// double ratio, xRatio, yRatio;
+	// double xMid;
 
-	xRatio = floor((maincanvasWidth - (2 * CANVASWIDTHOFFSET)) / xMax);
-	yRatio = floor((maincanvasHeight - (2 * CANVASHEIGHTOFFSET)) / yMax);
-	ratio = (xRatio < yRatio) ? xRatio : yRatio;
+	// xRatio = floor((maincanvasWidth - (2 * CANVASWIDTHOFFSET)) / xMax);
+	// yRatio = floor((maincanvasHeight - (2 * CANVASHEIGHTOFFSET)) / yMax);
+	// ratio = (xRatio < yRatio) ? xRatio : yRatio;
 
-	for (i = 0; i < treeSize; i++)
-	{
-		if (tree[i].level == 1)
-		{
-			printf("%lf\n", tree[i].x);
-			xMid = (tree[i].x * ratio);
-			// xi = i;
-			break;
-		}
-	}
+	// for (i = 0; i < treeSize; i++)
+	// {
+	// 	if (tree[i].level == 1)
+	// 	{
+	// 		printf("%lf\n", tree[i].x);
+	// 		xMid = (tree[i].x * ratio);
+	// 		// xi = i;
+	// 		break;
+	// 	}
+	// }
 
-	for (i = 0; i < treeSize; i++)
-	{
-		if (tree[i].level == 1)
-		{
-			cairo_move_to(maincanvas_cs, (tree[i].x * ratio), 0);
-			cairo_set_source_rgb(maincanvas_cs, 0, 1, 0);
-			cairo_set_line_width(maincanvas_cs, 2);
-			cairo_rel_line_to(maincanvas_cs, 0, maincanvasHeight);
-			cairo_stroke(maincanvas_cs);
-		}
-		else if (tree[i].level == 2)
-		{
-			printf("x,y: %lf, %lf (%lf)\n\n", tree[i].x, tree[i].y,xMid);
-			cairo_set_source_rgb(maincanvas_cs, 0, 0, 1);
-			cairo_set_line_width(maincanvas_cs, 2);
-			if ((xMid/ratio) > tree[i].x)
-			{
-				cairo_move_to(maincanvas_cs, 0, (tree[i].y * ratio));
-				cairo_rel_line_to(maincanvas_cs, xMid, 0);
-				cairo_stroke(maincanvas_cs);
-			}
-			else
-			{
-				printf("xaxaxaxaxa\n");
-				cairo_move_to(maincanvas_cs, xMid, (tree[i].y * ratio));
-				cairo_rel_line_to(maincanvas_cs, maincanvasWidth - xMid, 0);
-				cairo_stroke(maincanvas_cs);
-			}
-		}
+	// for (i = 0; i < treeSize; i++)
+	// {
+	// 	if (tree[i].level == 1)
+	// 	{
+	// 		cairo_move_to(maincanvas_cs, (tree[i].x * ratio), 0);
+	// 		cairo_set_source_rgb(maincanvas_cs, 0, 1, 0);
+	// 		cairo_set_line_width(maincanvas_cs, 2);
+	// 		cairo_rel_line_to(maincanvas_cs, 0, maincanvasHeight);
+	// 		cairo_stroke(maincanvas_cs);
+	// 	}
+	// 	else if (tree[i].level == 2)
+	// 	{
+	// 		printf("x,y: %lf, %lf (%lf)\n\n", tree[i].x, tree[i].y,xMid);
+	// 		cairo_set_source_rgb(maincanvas_cs, 0, 0, 1);
+	// 		cairo_set_line_width(maincanvas_cs, 2);
+	// 		if ((xMid/ratio) > tree[i].x)
+	// 		{
+	// 			cairo_move_to(maincanvas_cs, 0, (tree[i].y * ratio));
+	// 			cairo_rel_line_to(maincanvas_cs, xMid, 0);
+	// 			cairo_stroke(maincanvas_cs);
+	// 		}
+	// 		else
+	// 		{
+	// 			printf("xaxaxaxaxa\n");
+	// 			cairo_move_to(maincanvas_cs, xMid, (tree[i].y * ratio));
+	// 			cairo_rel_line_to(maincanvas_cs, maincanvasWidth - xMid, 0);
+	// 			cairo_stroke(maincanvas_cs);
+	// 		}
+	// 	}
 
-		cairo_arc(maincanvas_cs, (tree[i].x * ratio), (tree[i].y * ratio), 2.5, 0, 2 * M_PI);
-		cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
-		cairo_fill(maincanvas_cs);
-	}
+	// 	cairo_arc(maincanvas_cs, (tree[i].x * ratio), (tree[i].y * ratio), 2.5, 0, 2 * M_PI);
+	// 	cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
+	// 	cairo_fill(maincanvas_cs);
+	// }
 
 	/*
 	// Red filled Square

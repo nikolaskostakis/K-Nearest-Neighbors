@@ -18,7 +18,7 @@ FOOTER =
 GUI_FOOTER = `pkg-config --libs gtk+-2.0` `pkg-config --libs gthread-2.0`
 
 # Objects #
-OBJ = quicksort.o tree.o ui.o tcl.o readline.o main.o io.o structures.o
+OBJ = main.o ui.o tcl.o readline.o io.o structures.o
 
 knn: EXEC_HEADER := $(GUI_HEADER)
 knn: EXEC_FOOTER := $(GUI_FOOTER) $(MATH) $(TCL) $(READLINE)
@@ -26,25 +26,14 @@ knn: $(OBJ)
 	$(CC) $(CFLAGS) $(EXEC_HEADER) $^ -o $@ $(EXEC_FOOTER)
 
 main.o: CFLAGS += -c
-main.o: FOOTER := $(TCL) $(READLINE)
 main.o: src/main.c src/main.h
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
-quicksort.o: CFLAGS += -c
-quicksort.o: src/quicksort/quicksort.c src/quicksort/quicksort.h
-	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
-
-tree.o: CFLAGS += -c
-tree.o: src/tree/tree.c src/tree/tree.h
-	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
-
 tcl.o: CFLAGS += -c
-tcl.o: FOOTER := $(TCL)
 tcl.o: src/tcl/tcl.c src/tcl/tcl.h
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
 readline.o: CFLAGS += -c
-readline.o: FOOTER := $(READLINE)
 readline.o: src/readline/readline.c src/readline/readline.h
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 

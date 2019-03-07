@@ -2,6 +2,7 @@
 #define DEFINITIONS
 
 #include <linux/limits.h>
+#include <assert.h>
 
 // Print Colors //
 #define NRM  "\x1B[0m"		// Normal Color //

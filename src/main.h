@@ -6,8 +6,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <math.h>
 
 #include <tcl.h> // The inclusion of the tcl library depends on your system //
+#include <readline/readline.h>
 #include <readline/history.h>
 
 #include "definitions.h"

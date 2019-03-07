@@ -41,5 +41,9 @@ int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *co
 	parse_points_file(fp);
 	fclose(fp);
 	print_point_hash();
+	 create_KD_tree();
+	print_KD_tree();
+	print_sorting_array();
+	print_nearest(4, 4);
 	return TCL_OK;
 }
