@@ -12,6 +12,39 @@ struct kdNode *kdTree = NULL;
 struct pointHashNode **pointArray = NULL;
 unsigned long pointArraySize = 0;
 
+/**
+ * @brief The Eucledean distance of two points
+ * 
+ * The points should have their coordinates given as doubles.
+ * 
+ * @param x1 The x-coordinate of the first point
+ * @param y1 The y-coordinate of the first point
+ * @param x2 The x-coordinate of the second point
+ * @param y2 The y-coordinate of the second point
+ * @return double 
+ */
+inline double euclidean_distance(double x1, double y1, double x2, double y2)
+{
+	return sqrt(pow(fabs(x2 - x1), 2) + pow(fabs(y2 - y1), 2));
+}
+
+/**
+ * @brief Complementary function used only for printing tabs
+ * 
+ * This function is used as part of the printing functions.
+ * 
+ * @param depth The number of tabs to be used
+ */
+inline void print_tabs(int depth)
+{
+	int i;
+
+	for (i = 0; i < depth; i++)
+	{
+		putchar('\t');
+	}
+}
+
 // Point Hash Table Functions //
 unsigned long point_hash_function(char *name)
 {
@@ -27,6 +60,13 @@ unsigned long point_hash_function(char *name)
 	return result;
 }
 
+/**
+ * @brief Insert a point to the Hash Table
+ * 
+ * @param name The name of the point
+ * @param x The x-coordinate of the point
+ * @param y The y-coordinate of the point
+ */
 void insert_point(char *name, double x, double y)
 {
 	unsigned long hash = 0;
@@ -58,6 +98,10 @@ void insert_point(char *name, double x, double y)
 	}
 }
 
+/**
+ * @brief Rehash the Hash Table
+ * 
+ */
 void rehash_point_hash()
 {
 	struct pointHash *oldHash = pointHT;
@@ -110,10 +154,19 @@ void rehash_point_hash()
 	free(oldHash);
 }
 
+/**
+ * @brief Free the Hash Table that the points are stored
+ * 
+ */
 void free_point_hash()
 {
 	unsigned long i;
 	int j;
+
+	if (pointHT == NULL)
+	{
+		return;
+	}
 
 	for (i = 0; i < pointHTSize; i++)
 	{
@@ -124,7 +177,7 @@ void free_point_hash()
 
 		for (j = 0; j < pointHT[i].depth; j++)
 		{
-			free(pointHT[i].nodes[i].name);
+			free(pointHT[i].nodes[j].name);
 		}
 		free(pointHT[i].nodes);
 	}
@@ -136,6 +189,10 @@ void free_point_hash()
 }
 
 // Print the content of the point Hash Table //
+/**
+ * @brief Print the content of the Hash Table
+ * 
+ */
 void print_point_hash()
 {
 	unsigned long i;
@@ -169,6 +226,14 @@ void print_point_hash()
 
 // Comparators //
 // Compare the x axis values of two points on the array //
+/**
+ * @brief Compare the x axis values of two points on the array
+ * 
+ * @param p1 Pointer to the first point
+ * @param p2 Pointer to the second point
+ * 
+ * @return int Returns 1 if p1 is greater than p2, -1 if p2 is greater than p1 & 0 if they have equal value
+ */
 int point_x_comparator(const void *p1, const void *p2)
 {
 	// Check if the first point's coordinate is after the second's //
@@ -189,6 +254,14 @@ int point_x_comparator(const void *p1, const void *p2)
 }
 
 // Compare the y axis values of two points on the array //
+/**
+ * @brief Compare the y axis values of two points on the array
+ * 
+ * @param p1 Pointer to the first point
+ * @param p2 Pointer to the second point
+ * 
+ * @return int Returns 1 if p1 is greater than p2, -1 if p2 is greater than p1 & 0 if they have equal value
+ */
 int point_y_comparator(const void *p1, const void *p2)
 {
 	// Check if the first point's coordinate is after the second's //
@@ -209,6 +282,12 @@ int point_y_comparator(const void *p1, const void *p2)
 }
 
 // Sorting Array for KD Tree //
+/**
+ * @brief Create a sorting array of pointers to the Hash Tabls
+ * 
+ * This array is used as reference for the KD Tree
+ * 
+ */
 void create_sorting_array()
 {
 	unsigned long i, k;
@@ -237,6 +316,11 @@ void create_sorting_array()
 
 void free_sorting_array()
 {
+	if (pointArray == NULL)
+	{
+		return;
+	}
+
 	free(pointArray);
 	pointArray = NULL;
 	pointArraySize = 0;
@@ -254,12 +338,16 @@ void print_sorting_array()
 }
 
 // KD Tree Funcions //
+/**
+ * @brief Create the KD Tree
+ * 
+ */
 void create_KD_tree()
 {
-	if (kdTree != NULL)
-	{
-
-	}
+	// Free the previous tree //
+	free_KD_tree();
+	
+	free_sorting_array();
 	create_sorting_array();
 
 	// Create the head of the tree //
@@ -280,6 +368,14 @@ void create_KD_tree()
 	kdTree->right = insert_KD_tree_node(kdTree, (kdTree->splitIndex + 1), kdTree->endIndex);
 }
 
+/**
+ * @brief Insert a KD node to the parent
+ * 
+ * @param parent Parent Node
+ * @param startIndex Start index for the new node
+ * @param endIndex End index for the new node
+ * @return struct kdNode* Returns the new node
+ */
 struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startIndex, unsigned long endIndex)
 {
 	unsigned long noofElements = 0;
@@ -296,8 +392,10 @@ struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startInd
 	// Find the number of elements that correspond to this node //
 	noofElements = endIndex - startIndex + 1;
 
+	// If the node has more elements than the defined max //
 	if (noofElements > MAX_KDLEAF_ELEMENTS)
 	{
+		// The node cannote be a leaf node and the elements are split in two to its children //
 		node->isLeaf = false;
 		node->splitIndex = startIndex + ((endIndex - startIndex) / 2);
 		node->axis = ~parent->axis;
@@ -321,23 +419,52 @@ struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startInd
 	return node;
 }
 
+// Free the KD Tree //
+/**
+ * @brief Free the KD tree
+ * 
+ * Actually a wrapper of the function free_KD_node for the whole KD Tree.
+ * 
+ */
 void free_KD_tree()
 {
+	if (kdTree == NULL)
+	{
+		return;
+	}
+
 	free_KD_node(kdTree);
 	kdTree = NULL;
 }
 
+// Free this node of the KD Tree//
+/**
+ * @brief Free this node
+ * 
+ * @param node 
+ */
 void free_KD_node(struct kdNode *node)
 {
+	// If the node is not a leaf one //
 	if (node->isLeaf == false)
 	{
+		// First free its children //
 		free_KD_node(node->left);
 		free_KD_node(node->right);
 	}
 
+	// Free the node //
 	free(node);
 }
 
+// Printe the KD Tree //
+// Actually a wrapper for print_KD_node //
+/**
+ * @brief Print the KD tree
+ * 
+ * Actually a wrapper of the function print_KD_node for the whole KD Tree.
+ * 
+ */
 void print_KD_tree()
 {
 	if (kdTree == NULL)
@@ -349,54 +476,50 @@ void print_KD_tree()
 	print_KD_node(kdTree, 0);
 }
 
+// Print this node of the KD Tree //
+/**
+ * @brief Print this specific node
+ * 
+ * The node is printed with the a number of tabs in front of it the same as its depth.
+ * The tabs are printed with the function print_tabs().
+ * 
+ * @param node The node that needs to printed
+ * @param depth The depth of the node
+ */
 void print_KD_node(struct kdNode *node, int depth)
 {
-	int i;
-
-	for(i = 0; i < depth; i++)
-	{
-		printf("\t");
-	}
+	print_tabs(depth);
 	printf(BLU"Start Index: "NRM"%lu\n", node->startIndex);
 	
-	for(i = 0; i < depth; i++)
-	{
-		printf("\t");
-	}
+	print_tabs(depth);
 	printf(BLU"End Index:   "NRM"%lu\n", node->endIndex);
 
 	if (node->isLeaf == true)
 	{
-		for(i = 0; i < depth; i++)
-		{
-			printf("\t");
-		}
+		print_tabs(depth);
 		printf(MAG"\tLeaf node!\n");
 	}
 	else
 	{
-		for(i = 0; i < depth; i++)
-		{
-			printf("\t");
-		}
+		print_tabs(depth);
 		printf(MAG"\tLeft child:\n");
 		print_KD_node(node->left, (depth + 1));
 
-		for(i = 0; i < depth; i++)
-		{
-			printf("\t");
-		}
+		print_tabs(depth);
 		printf(MAG"\tRight child:\n");
 		print_KD_node(node->right, (depth + 1));
 	}
 	
 }
 
-inline double euclidean_distance(double x1, double y1, double x2, double y2)
-{
-	return sqrt(pow(fabs(x2 - x1), 2) + pow(fabs(y2 - y1), 2));
-}
-
+/**
+ * @brief Find the nearest neighbour
+ * 
+ * @param node The KD node on which the neigbour is searced
+ * @param x The given x-coordinate
+ * @param y The given y-coordinate
+ * @return unsigned long Returns the index to the Reference Array
+ */
 unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 {
 	double minDistance = 0;

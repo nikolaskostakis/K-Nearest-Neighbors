@@ -10,6 +10,7 @@
 #include "prime_numbers.h"
 #include "../definitions.h"
 
+// Definitions //
 #define MAX_HASH_DEPTH 10
 #define MAX_KDLEAF_ELEMENTS 5
 
@@ -58,7 +59,5 @@ void free_KD_tree();
 void free_KD_node(struct kdNode *node);
 void print_KD_tree();
 void print_KD_node(struct kdNode *node, int depth);
-
-inline double euclidean_distance(double x1, double y1, double x2, double y2);
 
 #endif
