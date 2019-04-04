@@ -1,4 +1,4 @@
-#include "ui-scrolled-canvas-skeleton.h"
+#include "ui.h"
 
 GtkWidget *maincanvas_scroll; // scrolled window container for main canvas //
 GtkWidget *maincanvas; // main canvas widget // 
@@ -23,6 +23,8 @@ int maincanvasOx = 0; // main canvas visible origin translation - x offset //
 int maincanvasOy = 0; // main canvas visible origin translation - y offset //
 
 GtkWidget *mainwindow; // your main window //
+
+double ratio = 0;
 
 // Expose-Event Paint Function for maincanvas //
 static void expose(GtkWidget *widget, GdkEventExpose *event, gpointer data)
@@ -51,106 +53,50 @@ static void maincanvaspaint(GtkWidget *widget, GdkEventExpose *event, gpointer d
 // 
 void draw_maincancas()
 {
-	int width = maincanvasWidth;// - (2 * CANVASWIDTHOFFSET);
-	int height = maincanvasHeight;// - (2 * CANVASHEIGHTOFFSET);
-	
 	// Draw Canvas
 	cairo_set_source_rgb(maincanvas_cs, 0, 0, 0);
-	cairo_rectangle(maincanvas_cs, 0, 0, width, height);
+	cairo_rectangle(maincanvas_cs, 0, 0, maincanvasWidth, maincanvasHeight);
 	cairo_fill(maincanvas_cs);
 
-	// cairo_arc(maincanvas_cs, 100, 100, 5, 0, 2 * M_PI);
-	// cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
-	// cairo_fill(maincanvas_cs);
 	draw_shapes();
 }
 
 void draw_shapes()
 {
-	// cairo_text_extents_t te;
-	
-	// int i;//, xi;
-	// double ratio, xRatio, yRatio;
-	// double xMid;
+	unsigned long i;
+	int j;
+	double xRatio, yRatio;
+	double x,y;
+	cairo_text_extents_t te;
 
-	// xRatio = floor((maincanvasWidth - (2 * CANVASWIDTHOFFSET)) / xMax);
-	// yRatio = floor((maincanvasHeight - (2 * CANVASHEIGHTOFFSET)) / yMax);
-	// ratio = (xRatio < yRatio) ? xRatio : yRatio;
+	if (pointHTSize != 0)
+	{
+		xRatio = floor((maincanvasWidth - (2 * CANVASWIDTHOFFSET)) / pointMaxXCoordinate);
+		yRatio = floor((maincanvasHeight - (2 * CANVASHEIGHTOFFSET)) / pointMaxYCoordinate);
+		ratio = (xRatio < yRatio) ? xRatio : yRatio;
+		
+		for (i = 0; i < pointHTSize; i++)
+		{
+			for (j = 0; j < get_point_hash_depth(i); j++)
+			{
+				// The Coordinates of the point //
+				x = CANVASWIDTHOFFSET + (get_point_x_coord(i, j) * ratio);
+				y = CANVASHEIGHTOFFSET + (get_point_y_coord(i, j) * ratio);
+				
+				// Draw the point //
+				cairo_arc(maincanvas_cs, x, y, POINT_DIAMETER, 0, 2 * M_PI);
+				cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
+				cairo_fill(maincanvas_cs);
 
-	// for (i = 0; i < treeSize; i++)
-	// {
-	// 	if (tree[i].level == 1)
-	// 	{
-	// 		printf("%lf\n", tree[i].x);
-	// 		xMid = (tree[i].x * ratio);
-	// 		// xi = i;
-	// 		break;
-	// 	}
-	// }
-
-	// for (i = 0; i < treeSize; i++)
-	// {
-	// 	if (tree[i].level == 1)
-	// 	{
-	// 		cairo_move_to(maincanvas_cs, (tree[i].x * ratio), 0);
-	// 		cairo_set_source_rgb(maincanvas_cs, 0, 1, 0);
-	// 		cairo_set_line_width(maincanvas_cs, 2);
-	// 		cairo_rel_line_to(maincanvas_cs, 0, maincanvasHeight);
-	// 		cairo_stroke(maincanvas_cs);
-	// 	}
-	// 	else if (tree[i].level == 2)
-	// 	{
-	// 		printf("x,y: %lf, %lf (%lf)\n\n", tree[i].x, tree[i].y,xMid);
-	// 		cairo_set_source_rgb(maincanvas_cs, 0, 0, 1);
-	// 		cairo_set_line_width(maincanvas_cs, 2);
-	// 		if ((xMid/ratio) > tree[i].x)
-	// 		{
-	// 			cairo_move_to(maincanvas_cs, 0, (tree[i].y * ratio));
-	// 			cairo_rel_line_to(maincanvas_cs, xMid, 0);
-	// 			cairo_stroke(maincanvas_cs);
-	// 		}
-	// 		else
-	// 		{
-	// 			printf("xaxaxaxaxa\n");
-	// 			cairo_move_to(maincanvas_cs, xMid, (tree[i].y * ratio));
-	// 			cairo_rel_line_to(maincanvas_cs, maincanvasWidth - xMid, 0);
-	// 			cairo_stroke(maincanvas_cs);
-	// 		}
-	// 	}
-
-	// 	cairo_arc(maincanvas_cs, (tree[i].x * ratio), (tree[i].y * ratio), 2.5, 0, 2 * M_PI);
-	// 	cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
-	// 	cairo_fill(maincanvas_cs);
-	// }
-
-	/*
-	// Red filled Square
-	cairo_rectangle(maincanvas_cs, 40, 40, 100, 100);
-	cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
-	cairo_fill(maincanvas_cs);
-
-	cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
-	cairo_select_font_face (maincanvas_cs, "Georgia", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (maincanvas_cs, 15);
-	cairo_text_extents (maincanvas_cs, "Square", &te);
-	cairo_move_to (maincanvas_cs, (40 + 50) - te.width / 2 - te.x_bearing,
-	    (40 + 50) - te.height / 2 - te.y_bearing);
-	cairo_show_text (maincanvas_cs, "Square");
-
-	// Green-ish Rectangle
-	cairo_rectangle(maincanvas_cs, 340, 430, 100, 40);
-	cairo_set_source_rgb(maincanvas_cs, 153/255, 255/255, 204/255);
-	cairo_stroke(maincanvas_cs);
-	
-	cairo_set_source_rgb(maincanvas_cs, 153/255, 255/255, 204/255);
-	cairo_select_font_face (maincanvas_cs, "Georgia", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (maincanvas_cs, 15);
-	cairo_text_extents (maincanvas_cs, "Rectangle", &te);
-	cairo_move_to (maincanvas_cs, (340 + 50) - te.width / 2 - te.x_bearing,
-	    (430 + 20) - te.height / 2 - te.y_bearing);
-	cairo_show_text (maincanvas_cs, "Rectangle");
-	*/
-
+				cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
+				cairo_select_font_face(maincanvas_cs, "Georgia", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+				cairo_set_font_size(maincanvas_cs, 15);
+				cairo_text_extents(maincanvas_cs, get_point_name(i, j), &te);
+				cairo_move_to(maincanvas_cs, x, y);
+				cairo_show_text(maincanvas_cs, get_point_name(i, j));
+			}
+		}
+	}
 }
 
 // Size-Allocate Event Function for maincanvas // 
@@ -227,6 +173,7 @@ void setupscrolladjustments()
 
 static void mousebutton(GtkWidget *widget, GdkEventButton *eev, gpointer data)
 {
+	double x, y;
 	// #ifdef DEBUGMODE
 	{
 		printf("DEBUG: Mouse Button %d Pressed\n", eev->button);
@@ -242,7 +189,16 @@ static void mousebutton(GtkWidget *widget, GdkEventButton *eev, gpointer data)
 	{
 		// code here //
 	}
-  
+	GdkEventMotion* e=(GdkEventMotion*)eev;
+	printf("Coordinates: (%u,%u)\n", (guint)e->x,(guint)e->y);
+
+	if (ratio != 0)
+	{
+		x = ((guint)e->x - CANVASWIDTHOFFSET) / ratio;
+		y = ((guint)e->y - CANVASHEIGHTOFFSET) / ratio;
+		printf("New Coordinates: (%lf,%lf)\n", x, y);
+		print_nearest(x, y);
+	}
 }
 
 static void quitaction()

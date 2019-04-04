@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "prime_numbers.h"
+// #include "prime_numbers.h"
 #include "../definitions.h"
 
 // Definitions //
@@ -43,6 +43,10 @@ struct kdNode
 unsigned long point_hash_function(char *name);
 void insert_point(char *name, double x, double y);
 void rehash_point_hash();
+int get_point_hash_depth(unsigned long hash);
+double get_point_x_coord(unsigned long hash, int depth);
+double get_point_y_coord(unsigned long hash, int depth);
+char *get_point_name(unsigned long hash, int depth);
 void free_point_hash();
 void print_point_hash();
 

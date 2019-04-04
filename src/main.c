@@ -1,13 +1,5 @@
 #include "main.h"
 
-#include "tree/tree.h"
-
-extern void quicksort (TREE array[], int start, int end, int TREE);
-extern TREE *CreateTree(TREE kd_tree[], int start, int end, int TREE);
-
-int treeSize = 0;
-TREE *tree;
-
 int main (int argc, char *argv[]){
 	unsigned long i;
 	HIST_ENTRY **hist_list;

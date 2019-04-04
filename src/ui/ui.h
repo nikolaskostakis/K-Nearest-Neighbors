@@ -16,6 +16,8 @@
 #define CANVASWIDTHOFFSET   CANVASOFFSET
 #define CANVASHEIGHTOFFSET  CANVASOFFSET
 
+#define POINT_DIAMETER 2.5
+
 extern GtkWidget *maincanvas_scroll; // scrolled window container for main canvas //
 extern GtkWidget *maincanvas; // main canvas widget // 
 extern cairo_t *maincanvas_cs; // main canvas cairo state // 
@@ -57,4 +59,17 @@ void draw_maincancas();
 void draw_shapes();
 void draw_point(double x, double y);
 
+// External Variables //
+
+// From structures //
+extern double pointMaxXCoordinate;
+extern double pointMaxYCoordinate;
+extern unsigned long pointHTSize;
+
+// External Functions //
+extern int get_point_hash_depth(unsigned long hash);
+extern double get_point_x_coord(unsigned long hash, int depth);
+extern double get_point_y_coord(unsigned long hash, int depth);
+extern char *get_point_name(unsigned long hash, int depth);
+extern void print_nearest(double x, double y);
 #endif

@@ -23,12 +23,20 @@ void parse_points_file(FILE *fp)
 		assert(token != NULL);
 
 		x = atof(token);
+		if (isgreater(x, pointMaxXCoordinate) == 1)
+		{
+			pointMaxXCoordinate = x;
+		}
 
 		// Third token - Y-coordinate //
 		token = strtok(NULL, DELIMITERS);
 		assert(token != NULL);
 
 		y = atof(token);
+		if (isgreater(y, pointMaxYCoordinate) == 1)
+		{
+			pointMaxYCoordinate = y;
+		}
 
 		// Syntax checking //
 		token = strtok(NULL, DELIMITERS);
