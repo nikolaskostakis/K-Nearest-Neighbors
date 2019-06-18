@@ -17,6 +17,7 @@ int find_NN(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const 
 int clear_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
+int print_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 
 // External Functions //
 
@@ -35,5 +36,8 @@ extern unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node,
 
 extern struct kdNode *kdTree;
 extern struct pointHashNode **pointArray;
+
+extern void print_point_hash_distances(double x, double y);
+
 
 #endif

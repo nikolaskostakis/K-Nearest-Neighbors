@@ -23,6 +23,7 @@ char *commands[] = {
 	"variable", "vwait", "while", "yield", "yieldto", "zlib",
 	"history",
 	"start_gui", "read_points", "print_hash", "create_kdTree", "find_NN", "clear_points", "find_nearest_neighbours",
+	"print_array",
 
 	NULL
 };

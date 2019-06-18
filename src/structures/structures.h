@@ -30,10 +30,10 @@ struct pointHash
 struct kdNode
 {
 	bool isLeaf;
-	int axis; // 0 for x & 1 for y //
+	bool axis; // true for x & false for y //
 	unsigned long startIndex;
 	unsigned long endIndex;
-	unsigned long splitIndex;
+	struct pointHashNode *splitIndex;
 	struct kdNode *left;
 	struct kdNode *right;
 	struct kdNode *parent;

@@ -36,6 +36,7 @@ void init_tcl(char *argv[])
 	Tcl_CreateObjCommand(interpreter, "clear_points", clear_points, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "find_nearest_neighbours", find_nearest_neighbours, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "find_neighbours_within_radius", find_neighbours_within_radius, NULL, NULL);
+	Tcl_CreateObjCommand(interpreter, "print_array", print_array, NULL, NULL);
 }
 
 int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
@@ -163,12 +164,13 @@ int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc,
 	}
 	else if (k == 1)
 	{
+		print_point_hash_distances(x, y);
 		print_nearest(x, y);
 	}
 	else
 	{
 		create_KD_tree();
-
+		print_point_hash_distances(x, y);
 		indexes = find_n_nearest_neighbours(kdTree, x, y, k, &noofIndexes);
 		assert(indexes != NULL);
 
@@ -211,6 +213,8 @@ int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int
 	{
 		create_KD_tree();
 
+		print_point_hash_distances(x, y);
+
 		indexes = find_nearest_neighbours_within_radius(kdTree, x, y, r, &noofIndexes);
 		if (indexes != NULL)
 		{
@@ -224,6 +228,21 @@ int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int
 			printf(YEL"No neighbors within radius!\n"NRM);
 		}
 	}
+
+	return TCL_OK;
+}
+
+int print_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
+{
+	const char syntax[] = "";
+
+	if (argc != 1)
+	{
+		Tcl_WrongNumArgs(interp, 1, argv, syntax);
+		return TCL_ERROR;
+	}
+
+	print_sorting_array();
 
 	return TCL_OK;
 }
