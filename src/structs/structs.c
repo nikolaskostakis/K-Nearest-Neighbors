@@ -1,4 +1,4 @@
-#include "structures.h"
+#include "structs.h"
 #include "prime_numbers.h"
 
 // Point Hash Table //
@@ -947,17 +947,7 @@ unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double
 	return indexes;
 }
 
-/**
- * @brief      { function_description }
- *
- * @param      node           The node
- * @param      x              { parameter_description }
- * @param      y              { parameter_description }
- * @param      n              { parameter_description }
- * @param      noofNeighbors  The noof neighbors
- *
- * @return     { description_of_the_return_value }
- */
+// *** find_n_nearest_neighbours *** //
 unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y, unsigned long n, unsigned long *noofNeighbors)
 {
 	unsigned long *indexes = NULL;
@@ -997,7 +987,7 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 			if (isgreater(x, node->splitIndex->x))
 			{
 				indexes = find_n_nearest_neighbours(node->right, x, y, n, &noofIndexes);
-				distance = euclidean_distance(x, y, node->splitIndex->x, node->splitIndex->y);
+				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
 				if (isless(fabs(x - node->splitIndex->x), distance) == 1)
 				{
 					newIndexes = find_n_nearest_neighbours(node->left, x, y, n, &noofNewIndexes);
@@ -1022,7 +1012,7 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 			else
 			{
 				indexes = find_n_nearest_neighbours(node->left, x, y, n, &noofIndexes);
-				distance = euclidean_distance(x, y, node->splitIndex->x, node->splitIndex->y);
+				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
 				if (isless(fabs(x - node->splitIndex->x), distance) == 1)
 				{
 					newIndexes = find_n_nearest_neighbours(node->right, x, y, n, &noofNewIndexes);
@@ -1050,7 +1040,7 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 			if (isgreater(y, node->splitIndex->y))
 			{
 				indexes = find_n_nearest_neighbours(node->right, x, y, n, &noofIndexes);
-				distance = euclidean_distance(x, y, node->splitIndex->x, node->splitIndex->y);
+				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
 				if (isless(fabs(y - node->splitIndex->y), distance) == 1)
 				{
 					newIndexes = find_n_nearest_neighbours(node->left, x, y, n, &noofNewIndexes);
@@ -1075,7 +1065,7 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 			else
 			{
 				indexes = find_n_nearest_neighbours(node->left, x, y, n, &noofIndexes);
-				distance = euclidean_distance(x, y, node->splitIndex->x, node->splitIndex->y);
+				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
 				if (isless(fabs(y - node->splitIndex->y), distance) == 1)
 				{
 					newIndexes = find_n_nearest_neighbours(node->right, x, y, n, &noofNewIndexes);

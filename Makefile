@@ -18,7 +18,7 @@ FOOTER =
 GUI_FOOTER = `pkg-config --libs gtk+-2.0` `pkg-config --libs gthread-2.0`
 
 # Objects #
-OBJ = build/main.o build/tcl/tcl.o build/readline/readline.o build/ui/ui.o build/io/io.o build/structures/structures.o
+OBJ = build/main.o build/tcl/tcl.o build/readline/readline.o build/ui/ui.o build/io/io.o build/structs/structs.o
 
 knn: EXEC_HEADER := $(GUI_HEADER)
 knn: EXEC_FOOTER := $(GUI_FOOTER) $(MATH) $(TCL) $(READLINE)
@@ -52,16 +52,16 @@ build/io/io.o: src/io/io.c src/io/io.h
 	@ mkdir -p build/io
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
-build/structures/structures.o: CFLAGS += -c
-build/structures/structures.o: src/structures/structures.c src/structures/structures.h
-	@ mkdir -p build/structures
+build/structs/structs.o: CFLAGS += -c
+build/structs/structs.o: src/structs/structs.c src/structs/structs.h
+	@ mkdir -p build/structs
 	$(CC) $(CFLAGS) $(HEADER) $< -o $@ $(FOOTER)
 
 .PHONY: clean clean_objects new
 
 clean_objects:
 	@ rm -f $(OBJ)
-	@ rm -rf build/ build/tcl/ build/readline/ build/ui/ build/io/ build/structures/
+	@ rm -rf build/ build/tcl/ build/readline/ build/ui/ build/io/ build/structs/
 	rm -rf build/
 
 clean: clean_objects

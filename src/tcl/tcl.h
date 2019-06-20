@@ -6,7 +6,7 @@
 #include <tcl.h> // The inclusion of the tcl library depends on your system //
 #include "../definitions.h"
 
-#include "../structures/structures.h"
+#include "../structs/structs.h"
 
 void init_tcl(char *argv[]);
 

@@ -1,6 +1,6 @@
 # K Nearest Neighbours
 
-## Summary
+## Description
 
 A C-based K Nearest Neighbours (KNN) algorith used in a graphical enviroment.
 

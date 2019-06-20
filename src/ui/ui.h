@@ -12,6 +12,10 @@
 #ifndef UI
 #define UI
 
+#define ZOOMSTEP      0.1
+#define BOUNDZOOMIN   2
+#define BOUNDZOOMOUT  0.1
+
 #define CANVASOFFSET        25
 #define CANVASWIDTHOFFSET   CANVASOFFSET
 #define CANVASHEIGHTOFFSET  CANVASOFFSET
