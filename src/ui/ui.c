@@ -86,8 +86,8 @@ void draw_shapes()
 			for (j = 0; j < get_point_hash_depth(i); j++)
 			{
 				// The Coordinates of the point //
-				x = CANVASWIDTHOFFSET + (get_point_x_coord(i, j) * ratio)*zoomvalue;
-				y = CANVASHEIGHTOFFSET + (get_point_y_coord(i, j) * ratio)*zoomvalue;
+				x = CANVASWIDTHOFFSET + (get_point_x_coord(i, j) * ratio)*zoomvalue - maincanvasOx;
+				y = CANVASHEIGHTOFFSET + (get_point_y_coord(i, j) * ratio)*zoomvalue - maincanvasOy;
 				
 				// Draw the point //
 				cairo_arc(maincanvas_cs, x, y, (POINT_DIAMETER * zoomvalue), 0, 2 * M_PI);
@@ -238,8 +238,8 @@ static void mousebutton(GtkWidget *widget, GdkEventButton *eev, gpointer data)
 
 		if (ratio != 0)
 		{
-			x = ((guint)e->x - CANVASWIDTHOFFSET) / (ratio * zoomvalue);
-			y = ((guint)e->y - CANVASHEIGHTOFFSET) / (ratio * zoomvalue);
+			x = ((guint)e->x - CANVASWIDTHOFFSET + maincanvasOx) / (ratio * zoomvalue) ;
+			y = ((guint)e->y - CANVASHEIGHTOFFSET + maincanvasOy) / (ratio * zoomvalue) ;
 			printf("New Coordinates: (%lf,%lf)\r\n", x, y);
 			print_nearest(x, y);
 		}

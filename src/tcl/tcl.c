@@ -29,6 +29,9 @@ void init_tcl(char *argv[])
 	interpreter = Tcl_CreateInterp();
 
 	// Create the commands //
+	Tcl_CreateObjCommand(interpreter, "less", less, NULL, NULL);
+	Tcl_CreateObjCommand(interpreter, "cat", cat, NULL, NULL);
+
 	Tcl_CreateObjCommand(interpreter, "read_points", read_points, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "print_hash", print_hash, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "create_kdTree", create_kdTree, NULL, NULL);
@@ -37,6 +40,76 @@ void init_tcl(char *argv[])
 	Tcl_CreateObjCommand(interpreter, "find_nearest_neighbours", find_nearest_neighbours, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "find_neighbours_within_radius", find_neighbours_within_radius, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "print_array", print_array, NULL, NULL);
+}
+
+int less(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
+{
+	char syntax[] = "<filepath>";
+	char command[] = "less";
+	char *ex_command = NULL, *arg = NULL;
+	int len = 0;
+
+	if (argc != 2)
+	{
+		Tcl_WrongNumArgs(interp, 1, argv, syntax);
+		return TCL_ERROR;
+	}
+
+	arg = Tcl_GetStringFromObj(argv[1], &len);
+	if (arg == NULL)
+	{
+		printf("Wrong Encoding of Argument: 1\n");
+		return TCL_ERROR;
+	}
+
+	ex_command = (char *) malloc((len + 4 + 2) * sizeof(char));
+	if (ex_command == NULL)
+	{
+		printf("Unable to Allocate Memory! Exiting...\n");
+		exit(1);
+	}
+
+	sprintf(ex_command, "%s %s", command, arg);
+
+	system(ex_command);
+	free(ex_command);
+
+	return TCL_OK;
+}
+
+int cat(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
+{
+	char syntax[] = "<filepath>";
+	char command[] = "cat";
+	char *ex_command = NULL, *arg = NULL;
+	int len = 0;
+
+	if (argc != 2)
+	{
+		Tcl_WrongNumArgs(interp, 1, argv, syntax);
+		return TCL_ERROR;
+	}
+
+	arg = Tcl_GetStringFromObj(argv[1], &len);
+	if (arg == NULL)
+	{
+		printf("Wrong Encoding of Argument: 1\n");
+		return TCL_ERROR;
+	}
+
+	ex_command = (char *) malloc((len + 4 + 2) * sizeof(char));
+	if (ex_command == NULL)
+	{
+		printf("Unable to Allocate Memory! Exiting...\n");
+		exit(1);
+	}
+
+	sprintf(ex_command, "%s %s", command, arg);
+
+	system(ex_command);
+	free(ex_command);
+
+	return TCL_OK;
 }
 
 int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
@@ -65,6 +138,8 @@ int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *co
 
 	parse_points_file(fp);
 	fclose(fp);
+
+	printf(GRN"Points have been parsed and stored!"NRM"\r\n");
 	
 	return TCL_OK;
 }
@@ -174,12 +249,19 @@ int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc,
 		indexes = find_n_nearest_neighbours(kdTree, x, y, k, &noofIndexes);
 		assert(indexes != NULL);
 
-		for (i = 0; i < noofIndexes; i++)
+		if (indexes != NULL)
 		{
-			printf("\t%s\n", pointArray[indexes[i]]->name);
-		}
-		
+			for (i = 0; i < noofIndexes; i++)
+			{
+				printf("\t%s\n", pointArray[indexes[i]]->name);
+			}
 
+			free(indexes);
+		}
+		else
+		{
+			printf(YEL"No neighbors within radius!\n"NRM);
+		}
 	}
 
 	return TCL_OK;
@@ -222,6 +304,8 @@ int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int
 			{
 				printf("\t%s\n", pointArray[indexes[i]]->name);
 			}
+
+			free(indexes);
 		}
 		else
 		{

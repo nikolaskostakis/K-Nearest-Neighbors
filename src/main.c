@@ -17,9 +17,11 @@ int main (int argc, char *argv[]){
 	using_history();
 	while (1)
 	{
+		// sleep(1);
 		getcwd(dir, sizeof(dir));
 		sprintf(symbol,CYN"[%s]"NRM": ", dir);
 		text = readline(symbol);
+		// sleep(2);
 		if (text != NULL)
 		{
 			expansion = history_expand(text, &hist_text);

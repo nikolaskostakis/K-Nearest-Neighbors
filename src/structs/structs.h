@@ -13,6 +13,10 @@
 // Definitions //
 #define MAX_HASH_DEPTH 10
 #define MAX_KDLEAF_ELEMENTS 5
+#define CELL_WIDTH    1.260
+#define CELL_HEIGHT   0.576
+
+// Structs for Points //
 
 struct pointHashNode
 {
@@ -39,6 +43,56 @@ struct kdNode
 	struct kdNode *parent;
 };
 
+// End //
+
+// Structs for Design //
+
+enum struct_type {nothing = 0, io, component};
+
+// Design Row //
+struct row
+{
+	char *name;
+	char *type;
+	// Starting Point of the Row
+	double location_x;
+	double location_y;
+	// Size
+	double width;
+	double height;
+};
+
+// Design I/O Pins //
+struct io
+{
+	char *name;
+	// Location
+	double x;
+	double y;
+};
+
+// Design Components/Cells //
+struct component
+{
+	char *name;
+
+	// Location (Top Left)
+	double x;
+	double y;
+};
+
+// P2P Net //
+struct net
+{
+	enum struct_type edge_type_one;
+	enum struct_type edge_type_two;
+	unsigned int edge_pointer_one;
+	unsigned int edge_pointer_two;
+	char *edge_name_one;
+	char *edge_name_two;
+};
+
+// Functions for Points //
 
 unsigned long point_hash_function(char *name);
 void insert_point(char *name, double x, double y);
@@ -62,6 +116,7 @@ struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startInd
 void free_KD_tree();
 void free_KD_node(struct kdNode *node);
 void print_KD_tree();
+void print_tabs(int depth);
 void print_KD_node(struct kdNode *node, int depth);
 
 #endif

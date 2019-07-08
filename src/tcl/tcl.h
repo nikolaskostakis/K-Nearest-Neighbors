@@ -10,6 +10,9 @@
 
 void init_tcl(char *argv[]);
 
+int less(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
+int cat(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
+
 int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 int print_hash(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 int create_kdTree(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);

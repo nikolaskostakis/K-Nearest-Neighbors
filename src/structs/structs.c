@@ -22,35 +22,6 @@ unsigned long pointArraySize = 0;
 double tempX, tempY;
 
 /**
- * @brief Complementary function used only for printing tabs
- * 
- * This function is used as part of the printing functions.
- * 
- * @param depth The number of tabs to be used
- */
-inline void print_tabs(int depth)
-{
-	int i;
-
-	for (i = 0; i < depth; i++)
-	{
-		putchar('\t');
-	}
-}
-
-/**
- * @brief The Eucledean distance of two points
- * 
- * The points should have their coordinates given as doubles.
- * 
- * @param x1 The x-coordinate of the first point
- * @param y1 The y-coordinate of the first point
- * @param x2 The x-coordinate of the second point
- * @param y2 The y-coordinate of the second point
- * @return double 
- */
-
-/**
  * @brief      The Eucledean distance of two points
  *
  * @param      x1    The x-coordinate of the first point
@@ -65,9 +36,6 @@ inline double euclidean_distance(double x1, double y1, double x2, double y2)
 	return sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
 }
 
-/**
- * Comparators
- */
 
 /**
  * @brief Compare the x axis values of two points on the array
@@ -123,6 +91,10 @@ int point_y_comparator(const void *p1, const void *p2)
 	}
 }
 
+// *** distance_comparator *** //
+// Comparator function for qsort() //
+// Compare the distances of the two compared points to //
+// given point and decise their positions accordingly  //
 int distance_comparator(const void *p1, const void *p2)
 {
 	double distance1;
@@ -150,13 +122,8 @@ int distance_comparator(const void *p1, const void *p2)
 
 // Point Hash Table Functions //
 
-/**
- * @brief      Hash function for the Point Hash
- *
- * @param      name  The name of the point
- *
- * @return     The hash
- */
+// *** point_hash_function *** //
+// Hash function //
 unsigned long point_hash_function(char *name)
 {
 	int i;
@@ -171,13 +138,8 @@ unsigned long point_hash_function(char *name)
 	return result;
 }
 
-/**
- * @brief Insert a point to the Hash Table
- * 
- * @param name The name of the point
- * @param x The x-coordinate of the point
- * @param y The y-coordinate of the point
- */
+// *** insert_point *** //
+// Insert a point to the Hash Table //
 void insert_point(char *name, double x, double y)
 {
 	unsigned long hash = 0;
@@ -209,13 +171,8 @@ void insert_point(char *name, double x, double y)
 	}
 }
 
-/**
- * @brief Rehash the Hash Table
- * 
- * Expand the length of the hash table. The new length is drawn by a static array of prime numbers.
- * If all the primes on the array we reused, the length is doubled.
- * 
- */
+// *** rehash_point_hash *** //
+// Resize and rehash the Hash Table //
 void rehash_point_hash()
 {
 	struct pointHash *oldHash = pointHT;
@@ -268,57 +225,36 @@ void rehash_point_hash()
 	free(oldHash);
 }
 
-/**
- * @brief Get the depth of the hash table for a particular hash
- * 
- * @param hash The hash code
- * @return int The depth for this hash
- */
+// *** get_point_hash_depth *** //
+// Get the depth of a given point //
 inline int get_point_hash_depth(unsigned long hash)
 {
 	return pointHT[hash].depth;
 }
 
-/**
- * @brief Get the x-coordinate of the point
- * 
- * @param hash The hash code of the point
- * @param depth THe depth on which the point is
- * @return double The x-coordinate of the point
- */
+// *** get_point_x_coord *** //
+// Get the x coordinate of a given point //
 inline double get_point_x_coord(unsigned long hash, int depth)
 {
 	return pointHT[hash].nodes[depth].x;
 }
 
-/**
- * @brief Get the y-coordinate of the point
- * 
- * @param hash The hash code of the point
- * @param depth THe depth on which the point is
- * @return double The y-coordinate of the point
- */
+// *** get_point_y_coord *** //
+// Get the y coordinate of a given point //
 inline double get_point_y_coord(unsigned long hash, int depth)
 {
 	return pointHT[hash].nodes[depth].y;
 }
 
-/**
- * @brief Get the name of the point
- * 
- * @param hash The hash code of the point
- * @param depth THe depth on which the point is
- * @return char* The name of the point
- */
+// *** get_point_name *** //
+// Get the name of a given point //
 inline char *get_point_name(unsigned long hash, int depth)
 {
 	return pointHT[hash].nodes[depth].name;
 }
 
-/**
- * @brief Free the Hash Table that the points are stored
- * 
- */
+// *** free_point_hash *** //
+// Free the point Hash Table //
 void free_point_hash()
 {
 	unsigned long i;
@@ -349,11 +285,8 @@ void free_point_hash()
 	pointHTPrimeIndex = 0;
 }
 
+// *** print_point_hash *** //
 // Print the content of the point Hash Table //
-/**
- * @brief Print the content of the Hash Table
- * 
- */
 void print_point_hash()
 {
 	unsigned long i;
@@ -385,6 +318,9 @@ void print_point_hash()
 	}
 }
 
+// *** print_point_hash_distances *** //
+// Debug Function //
+// Print the distance of the given coordinates to all the stored points //
 void print_point_hash_distances(double x, double y)
 {
 	unsigned long i;
@@ -411,12 +347,10 @@ void print_point_hash_distances(double x, double y)
 }
 
 // Sorting Array for KD Tree //
-/**
- * @brief Create a sorting array of pointers to the Hash Tabls
- * 
- * This array is used as reference for the KD Tree
- * 
- */
+
+// *** create_sorting_array *** //
+// Create a sorting array that points into the Points   //
+// hash table. It is used to be sorted for the KD tree. //
 void create_sorting_array()
 {
 	unsigned long i, k;
@@ -443,11 +377,8 @@ void create_sorting_array()
 	}
 }
 
-/**
- * @brief      { function_description }
- *
- * @return     { description_of_the_return_value }
- */
+// *** free_sorting_array *** //
+// Free the sorting array //
 void free_sorting_array()
 {
 	if (pointArray == NULL)
@@ -460,6 +391,8 @@ void free_sorting_array()
 	pointArraySize = 0;
 }
 
+// *** print_sorting_array *** //
+// Print the content of the sorting array //
 void print_sorting_array()
 {
 	unsigned long i;
@@ -504,14 +437,7 @@ void create_KD_tree()
 	kdTree->right = insert_KD_tree_node(kdTree, (split + 1), kdTree->endIndex);
 }
 
-/**
- * @brief Insert a KD node to the parent
- * 
- * @param parent Parent Node
- * @param startIndex Start index for the new node
- * @param endIndex End index for the new node
- * @return struct kdNode* Returns the new node
- */
+// *** insert_KD_tree_node *** //
 struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startIndex, unsigned long endIndex)
 {
 	unsigned long noofElements = 0;
@@ -558,13 +484,8 @@ struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startInd
 	return node;
 }
 
+// *** free_KD_tree *** //
 // Free the KD Tree //
-/**
- * @brief Free the KD tree
- * 
- * Actually a wrapper of the function free_KD_node for the whole KD Tree.
- * 
- */
 void free_KD_tree()
 {
 	if (kdTree == NULL)
@@ -576,13 +497,8 @@ void free_KD_tree()
 	kdTree = NULL;
 }
 
-/**
- * @brief      Free this KD Tree node
- *
- * @param      node  The node
- *
- * @return     { description_of_the_return_value }
- */
+// *** free_KD_node *** //
+// Free a node of the KD tree //
 void free_KD_node(struct kdNode *node)
 {
 	// If the node is not a leaf one //
@@ -597,57 +513,67 @@ void free_KD_node(struct kdNode *node)
 	free(node);
 }
 
-/**
- * @brief Print the KD tree
- * 
- * Actually a wrapper of the function print_KD_node for the whole KD Tree.
- * 
- */
+// *** print_KD_tree *** //
+// Print the KD tree and its content. //
 void print_KD_tree()
 {
 	if (kdTree == NULL)
 	{
-		printf(YEL"KD Tree Empty!\n"NRM);
+		printf(YEL"KD Tree Empty!\r\n"NRM);
 		return;
 	}
 
+	printf(MAG"Root:\r\n"NRM);
 	print_KD_node(kdTree, 0);
 }
 
-// Print this node of the KD Tree //
-/**
- * @brief Print this specific node
- * 
- * The node is printed with the a number of tabs in front of it the same as its depth.
- * The tabs are printed with the function print_tabs().
- * 
- * @param node The node that needs to printed
- * @param depth The depth of the node
- */
+// *** print_tabs *** //
+// Supplementary function that prints a certain number of tabs. It //
+// is used conjuction with print_KD_node() to print the KD tree.   //
+inline void print_tabs(int depth)
+{
+	int i;
+
+	for (i = 0; i < depth; i++)
+	{
+		putchar('\t');
+	}
+}
+
+// *** print_KD_node *** //
+// Print a given node of the KD tree in a certain depth. //
+// For the node print its start & end indexes of its     //
+// sub-array and its children, if its not a leaf node.   //
 void print_KD_node(struct kdNode *node, int depth)
 {
+	// Pint the start index of the node's sub-array //
 	print_tabs(depth);
 	printf(BLU"Start Index: "NRM"%lu\r\n", node->startIndex);
-	
+
+	// Pint the end index of the node's sub-array //
 	print_tabs(depth);
 	printf(BLU"End Index:   "NRM"%lu\r\n", node->endIndex);
 
+	// Check if the node is leaf //
 	if (node->isLeaf == true)
 	{
+		// Print a corresponding message //
 		print_tabs(depth);
 		printf(MAG"\tLeaf node!\r\n");
 	}
+	// If it is not, print its children //
 	else
 	{
+		// First the left child //
 		print_tabs(depth);
 		printf(MAG"\tLeft child:\r\n");
 		print_KD_node(node->left, (depth + 1));
 
+		// Then the right //
 		print_tabs(depth);
 		printf(MAG"\tRight child:\r\n");
 		print_KD_node(node->right, (depth + 1));
 	}
-	
 }
 
 /**

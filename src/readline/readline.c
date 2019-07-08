@@ -1,6 +1,6 @@
 #include "readline.h"
 
-// Array with the names of of the Tcl Commands
+// Array with the names of of the Tcl Commands //
 char *commands[] = {
 	// Vanilla Tcl Commands (Tcl 8.6) //
 	"after", "append", "apply", "argc", "argv()", "array", "auto_execok", "auto_import", "auto_load",
@@ -21,13 +21,22 @@ char *commands[] = {
 	"tcl_wordBreakAfter", "tcl_wordBreakBefore", "tcl_wordchars", "tcltest", "tell", "throw", "time",
 	"tm", "trace", "transchan", "try", "unknown", "unload", "unset", "update", "uplevel", "upvar",
 	"variable", "vwait", "while", "yield", "yieldto", "zlib",
+
+	// History command. Uses the custom one and not the one from tcl //
 	"history",
+
+	// Wrappers for shell commands //
+	"less", "cat",
+
+	// Custom commands //
 	"start_gui", "read_points", "print_hash", "create_kdTree", "find_NN", "clear_points", "find_nearest_neighbours",
 	"print_array",
 
 	NULL
 };
 
+// *** init_readline *** //
+// Wrapper dunction for the initialization of the readline completer //
 void init_readline()
 {
 	rl_completion_entry_function = NULL;
@@ -35,6 +44,8 @@ void init_readline()
 	rl_attempted_completion_function = custom_completion;
 }
 
+// *** custom_completion *** //
+// Custom completion function. It is the same as fileman.c //
 char **custom_completion(const char *text, int start, int end)
 {
 	char **matches = NULL;
@@ -48,6 +59,8 @@ char **custom_completion(const char *text, int start, int end)
 	return matches;
 }
 
+// *** custom_completer *** //
+// Custom completer function. It is the same as fileman.c //
 char *custom_completer(const char * text, int state)
 {
 	//  The index is defined as static because we need to continue the search //
