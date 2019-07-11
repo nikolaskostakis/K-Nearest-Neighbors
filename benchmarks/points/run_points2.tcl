@@ -1,5 +1,5 @@
-cat benchmarks/points2.txt
-read_points benchmarks/points2.txt
+cat benchmarks/points/points2.txt
+read_points benchmarks/points/points2.txt
 print_hash
 create_kdTree
 print_array

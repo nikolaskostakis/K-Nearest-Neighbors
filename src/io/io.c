@@ -1,5 +1,7 @@
 #include "io.h"
 
+// *** parse_points_file *** //
+// Parse through the file that has the points and store them //
 void parse_points_file(FILE *fp)
 {
 	char *line = NULL;
@@ -8,10 +10,11 @@ void parse_points_file(FILE *fp)
 	size_t length = 0;
 	double x, y;
 
-	token = strtok(line, DELIMITERS);
-
+	// While the file is not empty, get a line //
 	while (getline(&line, &length, fp) != -1)
 	{
+		// Break the line into tokens //
+
 		// First token - Point Name //
 		token = strtok(line, DELIMITERS);
 		assert(token != NULL);
@@ -46,5 +49,6 @@ void parse_points_file(FILE *fp)
 		insert_point(name, x, y);
 	}
 
+	// The last line needs to be freed //
 	free(line);
 }

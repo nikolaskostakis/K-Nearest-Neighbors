@@ -3,7 +3,7 @@
 // Tcl Interpreter //
 Tcl_Interp *interpreter = NULL;
 
-
+// *** find_flag_index *** //
 int find_flag_index(int argc, Tcl_Obj *const argv[], const char flag[])
 {
 	int i;
@@ -21,6 +21,7 @@ int find_flag_index(int argc, Tcl_Obj *const argv[], const char flag[])
 	return result;
 }
 
+// *** init_tcl *** //
 void init_tcl(char *argv[])
 {
 	Tcl_FindExecutable(argv[0]);
@@ -42,6 +43,7 @@ void init_tcl(char *argv[])
 	Tcl_CreateObjCommand(interpreter, "print_array", print_array, NULL, NULL);
 }
 
+// *** less *** //
 int less(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	char syntax[] = "<filepath>";
@@ -77,6 +79,7 @@ int less(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const arg
 	return TCL_OK;
 }
 
+// *** cat *** //
 int cat(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	char syntax[] = "<filepath>";
@@ -112,6 +115,7 @@ int cat(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv
 	return TCL_OK;
 }
 
+// *** read_points *** //
 int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "<filepath>";
@@ -144,6 +148,7 @@ int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *co
 	return TCL_OK;
 }
 
+// *** print_hash *** //
 int print_hash(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "";
@@ -159,6 +164,7 @@ int print_hash(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *con
 	return TCL_OK;
 }
 
+// *** creat_kdTree *** //
 int create_kdTree(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "";

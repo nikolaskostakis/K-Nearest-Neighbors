@@ -21,30 +21,17 @@ unsigned long pointArraySize = 0;
 // They are used for sorting using qsort() //
 double tempX, tempY;
 
-/**
- * @brief      The Eucledean distance of two points
- *
- * @param      x1    The x-coordinate of the first point
- * @param      y1    The y-coordinate of the first point
- * @param      x2    The x-coordinate of the second point
- * @param      y2    The y-coordinate of the second point
- *
- * @return     ((x2 - x1)^2 + (y2 - y1)^2)^(1/2)
- */
+// *** euclidean_distance *** //
+// Find the Euclidean distance between two points //
 inline double euclidean_distance(double x1, double y1, double x2, double y2)
 {
 	return sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
 }
 
-
-/**
- * @brief Compare the x axis values of two points on the array
- * 
- * @param p1 Pointer to the first point
- * @param p2 Pointer to the second point
- * 
- * @return int Returns 1 if p1 is greater than p2, -1 if p2 is greater than p1 & 0 if they have equal value
- */
+// *** point_x_comparator *** //
+// Comparator function for qsort() //
+// Compare the x coordinate of the two compared  //
+// points and decise their positions accordingly //
 int point_x_comparator(const void *p1, const void *p2)
 {
 	// Check if the first point's coordinate is after the second's //
@@ -64,14 +51,10 @@ int point_x_comparator(const void *p1, const void *p2)
 	}
 }
 
-/**
- * @brief Compare the y axis values of two points on the array
- * 
- * @param p1 Pointer to the first point
- * @param p2 Pointer to the second point
- * 
- * @return int Returns 1 if p1 is greater than p2, -1 if p2 is greater than p1 & 0 if they have equal value
- */
+// *** point_y_comparator *** //
+// Comparator function for qsort() //
+// Compare the y coordinate of the two compared  //
+// points and decise their positions accordingly //
 int point_y_comparator(const void *p1, const void *p2)
 {
 	// Check if the first point's coordinate is after the second's //
@@ -292,15 +275,17 @@ void print_point_hash()
 	unsigned long i;
 	int j;
 
+	// If the Hash Table is empty //
 	if (pointHTSize == 0)
 	{
 		printf(YEL"Point Hash Table is empty!\r\n"NRM);
 		return;
 	}
 
+	// run through the Hash Table //
 	for (i = 0; i < pointHTSize; i++)
 	{
-		printf(BLU"Hash Code:     "MAG"%lu\r\n"NRM, i);
+		printf(BLU"Hash:     "MAG"%lu\r\n"NRM, i);
 		printf(BLU"Stored Points:\n"NRM);
 
 		if (pointHT[i].depth == 0)
@@ -405,10 +390,8 @@ void print_sorting_array()
 }
 
 // KD Tree Funcions //
-/**
- * @brief Create the KD Tree
- * 
- */
+
+// ***  *** //
 void create_KD_tree()
 {
 	unsigned long split = 0;
@@ -576,15 +559,7 @@ void print_KD_node(struct kdNode *node, int depth)
 	}
 }
 
-/**
- * @brief      Find the nearest neighbour from certain coordinnates
- *
- * @param      node  The KD node on which the neigbour is searced
- * @param      x     The given x-coordinate
- * @param      y     The given y-coordinate
- *
- * @return     The index of the nearest point
- */
+// *** find_nearest_neighbour *** //
 unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 {
 	double minDistance = 0;
@@ -721,17 +696,7 @@ unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 }
 
 
-/**
- * @brief      Find the nearest neighbours from certain coordinates within a certain range
- *
- * @param      node           The tree node in which the search is done
- * @param      x              The given x-coordinate
- * @param      y              The given y-coordinate
- * @param      radius         The radius of the search
- * @param      noofNeighbors  The number neighbors found
- *
- * @return     An array of the found neighbours
- */
+// *** find_nearest_neighbours_within_radius *** //
 unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double x, double y, double radius, unsigned long *noofNeighbors)
 {
 	double distance = 0;
@@ -868,8 +833,10 @@ unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double
 		}
 	}
 	
+	// Pass the number of indexes //
 	*noofNeighbors = noofIndexes;
 
+	// Return the array of the indexes //
 	return indexes;
 }
 
@@ -883,36 +850,50 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 	unsigned long i, j;
 	double distance = 0;
 
+	// Assign the given coordinates to the global variables used in sorting //
 	tempX = x;
 	tempY = y;
 
 	// Check if the node is a leaf one //
 	if (node->isLeaf == true)
 	{
+		// Create an array the size of all the points designated to the leaf //
 		noofIndexes = node->endIndex - node->startIndex + 1;
 		indexes = (unsigned long *) calloc(noofIndexes, sizeof(unsigned long));
 		assert(indexes != NULL);
 
+		// Run through the array //
 		for (i = 0, j = node->startIndex; j <= node->endIndex; i++, j++)
 		{
+			// Fill it with the indexes of the points //
 			indexes[i] = j;
 		}
 
+		// Sort the array of indexes based on their distance from the given coordinates //
 		qsort(indexes, noofIndexes, sizeof(struct pointHashNode *), distance_comparator);
 
+		// If the number of indexes in the leaf exceed the number of required neighbors //
 		if (noofIndexes > n)
 		{
+			// Shrink the array to the required size //
 			indexes = (unsigned long *) realloc(indexes, n * sizeof(unsigned long));
 			noofIndexes = n;
 		}
 	}
+	// If it is not //
 	else
 	{
+		// Check the axis //
+		// For the x axis //
 		if (node->axis == true)
 		{
+			// If the given x coordinate is after the split //
 			if (isgreater(x, node->splitIndex->x))
 			{
+				// Find the nearest points on this half //
 				indexes = find_n_nearest_neighbours(node->right, x, y, n, &noofIndexes);
+				
+				// If the distance between the given x and the distance of the furthest point is less or equal with the radius //
 				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
 				if (isless(fabs(x - node->splitIndex->x), distance) == 1)
 				{
@@ -935,8 +916,10 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 					free(newIndexes);
 				}
 			}
+			// If the given x coordinate is before or on the split //
 			else
 			{
+				// Find the nearest points on this half //
 				indexes = find_n_nearest_neighbours(node->left, x, y, n, &noofIndexes);
 				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
 				if (isless(fabs(x - node->splitIndex->x), distance) == 1)
@@ -961,10 +944,13 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 				}
 			}
 		}
+		// For the y axis //
 		else
 		{
+			// If the given y coordinate is after the split //
 			if (isgreater(y, node->splitIndex->y))
 			{
+				// Find the nearest points on this half //
 				indexes = find_n_nearest_neighbours(node->right, x, y, n, &noofIndexes);
 				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
 				if (isless(fabs(y - node->splitIndex->y), distance) == 1)
@@ -988,8 +974,10 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 					free(newIndexes);
 				}
 			}
+			// If the given y coordinate is before or on the split //
 			else
 			{
+				// Find the nearest points on this half //
 				indexes = find_n_nearest_neighbours(node->left, x, y, n, &noofIndexes);
 				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
 				if (isless(fabs(y - node->splitIndex->y), distance) == 1)
@@ -1016,11 +1004,14 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 		}
 	}
 	
+	// Pass the number of indexes //
 	*noofNeighbors = noofIndexes;
 	
+	// Return the array of the indexes //
 	return indexes;
 }
 
+// *** print_nearest *** //
 void print_nearest(double x, double y)
 {
 	create_KD_tree();
