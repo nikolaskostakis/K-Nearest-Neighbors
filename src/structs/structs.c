@@ -24,7 +24,7 @@ double tempX, tempY;
 // *** euclidean_distance *** //
 // Find the Euclidean distance between two points //
 inline double euclidean_distance(double x1, double y1, double x2, double y2)
-{
+{	
 	return sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
 }
 
@@ -106,18 +106,20 @@ int distance_comparator(const void *p1, const void *p2)
 // Point Hash Table Functions //
 
 // *** point_hash_function *** //
-// Hash function //
+// Simple Hash function //
 unsigned long point_hash_function(char *name)
 {
 	int i;
 	int length = strlen(name);  
 	unsigned long result = 0;
 
+	// For each character of the string //
 	for (i = 0; i < length; i++)
 	{
+		// Add the character to the result //
 		result += name[i];
 	}
-    
+		
 	return result;
 }
 
@@ -130,15 +132,18 @@ void insert_point(char *name, double x, double y)
 	// If the Hash Table is empty //
 	if (pointHTSize == 0)
 	{
+		// Create the Hash Table //
 		pointHT = (struct pointHash *) calloc(primes[pointHTPrimeIndex], sizeof(struct pointHash));
 		assert(pointHT != NULL);
 		
 		pointHTSize = primes[pointHTPrimeIndex];
 		pointHTPrimeIndex++;
 	}
-	
+
+	// Find the hash //
 	hash = point_hash_function(name) % pointHTSize;
 	
+	// Add the point into the Hash Table //
 	pointHT[hash].nodes = (struct pointHashNode *) realloc(pointHT[hash].nodes, ((pointHT[hash].depth + 1) * sizeof(struct pointHashNode)));
 	assert(pointHT[hash].nodes != NULL);
 
@@ -146,16 +151,20 @@ void insert_point(char *name, double x, double y)
 	pointHT[hash].nodes[pointHT[hash].depth].x = x;
 	pointHT[hash].nodes[pointHT[hash].depth].y = y;
 
-
+	// Icrease the depth of the bucket for the given hash //
 	pointHT[hash].depth++;
+
+	// If the depth of the bucket exceeds the maimum //
 	if (pointHT[hash].depth == MAX_HASH_DEPTH)
 	{
+		// Rehash the Hash Table //
 		rehash_point_hash();
 	}
 }
 
 // *** rehash_point_hash *** //
-// Resize and rehash the Hash Table //
+// Rehashing of the Hash Table //
+// Increase its size and redistribute the content of the buckets // 
 void rehash_point_hash()
 {
 	struct pointHash *oldHash = pointHT;
@@ -165,15 +174,20 @@ void rehash_point_hash()
 	int j;
 
 	// Allocate a new hash table //
+	// If the size of the old Hash Table has been changed more //
+	// times than the maximum given number of prime numbers    //
 	if (pointHTPrimeIndex == MAX_NOOF_PRIMES)
 	{
+		// Create a new one with double the size //
 		pointHT = (struct pointHash *) calloc((2 * pointHTSize), sizeof(struct pointHash));
 		assert(pointHT != NULL);
 
 		pointHTSize *= 2;
 	}
+	// If it has not //
 	else
 	{
+		// Create a new with its size being the next prime number //
 		pointHT = (struct pointHash *) calloc(primes[pointHTPrimeIndex], sizeof(struct pointHash));
 		assert(pointHT != NULL);
 
@@ -181,18 +195,24 @@ void rehash_point_hash()
 		pointHTPrimeIndex++;
 	}
 	
-	// Transfer data from the old hash table to the new //
+	// Transfer data from the old Hash Table to the new //
+	// For each bucket of the old Hash Table
 	for (i = 0; i < oldHashSize; i++)
 	{
+		// If the bucket is empty //
 		if (oldHash[i].depth == 0)
 		{
+			// Continue to the next//
 			continue;
 		}
 
+		// For each point into the bucket //
 		for (j = 0; j < oldHash[i].depth; j++)
 		{
+			// Find a new hash based on the new Hash Table //
 			hash = point_hash_function(oldHash[i].nodes[j].name) % pointHTSize;
 
+			// Add the point into the corresponding bucket of the new Hash Table //
 			pointHT[hash].nodes = (struct pointHashNode *) realloc(pointHT[hash].nodes, ((pointHT[hash].depth + 1) * sizeof(struct pointHashNode)));
 			assert(pointHT[hash].nodes != NULL);
 
@@ -203,8 +223,11 @@ void rehash_point_hash()
 			pointHT[hash].depth++;
 		}
 
+		// Free the bucket of the old Hash table //
 		free(oldHash[i].nodes);
 	}
+
+	// Free the old Hash Table //
 	free(oldHash);
 }
 
@@ -243,25 +266,35 @@ void free_point_hash()
 	unsigned long i;
 	int j;
 
+	// If the Hash Table is empty //
 	if (pointHT == NULL)
 	{
+		// Do nothing //
 		return;
 	}
 
+	// For each bucket of the Hash Table //
 	for (i = 0; i < pointHTSize; i++)
 	{
+		// If the bucket is empty //
 		if (pointHT[i].depth == 0)
 		{
+			// Continue to the next //
 			continue;
 		}
 
+		// For each point into the bucket //
 		for (j = 0; j < pointHT[i].depth; j++)
 		{
+			// Free its name //
 			free(pointHT[i].nodes[j].name);
 		}
+
+		// Free the bucket
 		free(pointHT[i].nodes);
 	}
 
+	// Free the Hash Table //
 	free(pointHT);
 	pointHT = NULL;
 	pointHTSize = 0;
@@ -278,24 +311,31 @@ void print_point_hash()
 	// If the Hash Table is empty //
 	if (pointHTSize == 0)
 	{
+		// Print a correspoinding message //
 		printf(YEL"Point Hash Table is empty!\r\n"NRM);
 		return;
 	}
 
-	// run through the Hash Table //
+	// For each bucket of the Hash Table //
 	for (i = 0; i < pointHTSize; i++)
 	{
+		// Print its hash // 
 		printf(BLU"Hash:     "MAG"%lu\r\n"NRM, i);
 		printf(BLU"Stored Points:\n"NRM);
 
+		// If its empty //
 		if (pointHT[i].depth == 0)
 		{
+			// Print a corresponding message //
 			printf(MAG"\t(null)\r\n"NRM);
 		}
+		// If it is not //
 		else
 		{
+			// For each point into the bucket //
 			for (j = 0; j < pointHT[i].depth; j++)
 			{
+				// Print is name and coordinates //
 				printf(MAG"\tPoint: "NRM"%s "MAG"("NRM"%.2lf"MAG","NRM"%.2lf"MAG")\r\n"NRM, pointHT[i].nodes[j].name, pointHT[i].nodes[j].x, pointHT[i].nodes[j].y);
 			}
 		}
@@ -312,21 +352,30 @@ void print_point_hash_distances(double x, double y)
 	int j;
 	double distance;
 
+	// If the Hash Table is empty //
 	if (pointHTSize == 0)
 	{
+		// Print a cooresponding message //
 		printf(YEL"Point Hash Table is empty!\r\n"NRM);
 		return;
 	}
 
+	// For each bucket of the hash table //
 	for (i = 0; i < pointHTSize; i++)
 	{
-		if (pointHT[i].depth != 0)
+		// If the Hash Table is empty //
+		if (pointHT[i].depth == 0)
 		{
-			for (j = 0; j < pointHT[i].depth; j++)
-			{
-				distance = euclidean_distance(x, y, pointHT[i].nodes[j].x, pointHT[i].nodes[j].y);
-				printf(RED"--->"NRM"Distance from %s: %lf\r\n", pointHT[i].nodes[j].name, distance);
-			}
+			// Continue to the next //
+			continue;
+		}
+
+		// For each point of the bucket //
+		for (j = 0; j < pointHT[i].depth; j++)
+		{
+			// Find its distance to the given point and print it //
+			distance = euclidean_distance(x, y, pointHT[i].nodes[j].x, pointHT[i].nodes[j].y);
+			printf(RED"--->"NRM"Distance from %s: %lf\r\n", pointHT[i].nodes[j].name, distance);
 		}
 	}
 }
@@ -341,7 +390,7 @@ void create_sorting_array()
 	unsigned long i, k;
 	int j;
 
-	// First Pass - Find the size of the array //
+	// First Pass - Find the size of the array by adding the number of points in each bucket//
 	for (i = 0; i < pointHTSize; i++)
 	{
 		pointArraySize += pointHT[i].depth;
@@ -352,10 +401,13 @@ void create_sorting_array()
 	assert(pointArray != NULL);
 
 	// Second Pass - Fill the array //
+	// For each bucket of the Hash Table //
 	for (i = 0, k = 0; i < pointHTSize; i++)
 	{
+		// For each point into the bucket //
 		for(j = 0; j < pointHT[i].depth; j++)
 		{
+			// Add a reference to the point into the array //
 			pointArray[k] = &pointHT[i].nodes[j];
 			k++;
 		}
@@ -366,11 +418,14 @@ void create_sorting_array()
 // Free the sorting array //
 void free_sorting_array()
 {
+ 	// If the array is empty //
 	if (pointArray == NULL)
 	{
+		// Do nothing //
 		return;
 	}
 
+	// Free the array //
 	free(pointArray);
 	pointArray = NULL;
 	pointArraySize = 0;
@@ -382,8 +437,10 @@ void print_sorting_array()
 {
 	unsigned long i;
 
+	// For each point referred into the array //
 	for (i = 0; i < pointArraySize; i++)
 	{
+		// Print its name and coordinates //
 		printf(BLU"Point: "NRM"%s\r\n", pointArray[i]->name);
 		printf(MAG"\t("NRM"%.2lf"MAG","NRM"%.2lf"MAG")\r\n"NRM, pointArray[i]->x, pointArray[i]->y);
 	}
@@ -391,7 +448,7 @@ void print_sorting_array()
 
 // KD Tree Funcions //
 
-// ***  *** //
+// *** create_KD_tree *** //
 void create_KD_tree()
 {
 	unsigned long split = 0;
