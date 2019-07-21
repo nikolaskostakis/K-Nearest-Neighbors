@@ -11,10 +11,12 @@ double pointMaxXCoordinate = -1;
 double pointMaxYCoordinate = -1;
 
 // KD-Tree //
-struct kdNode *kdTree = NULL;
+struct kdTreeNode *kdTree = NULL;
+unsigned long kdTreeSize = 0;
+unsigned long kdTreeArraySize = 0;
 
 // Pointer Array for KD-Tree //
-struct pointHashNode **pointArray = NULL;
+struct pointHashElement **pointArray = NULL;
 unsigned long pointArraySize = 0;
 
 // Temporary Globals for coordinates //
@@ -35,12 +37,12 @@ inline double euclidean_distance(double x1, double y1, double x2, double y2)
 int point_x_comparator(const void *p1, const void *p2)
 {
 	// Check if the first point's coordinate is after the second's //
-	if (isgreater((double)(*(struct pointHashNode **)p1)->x, (double)(*(struct pointHashNode **)p2)->x) == 1)
+	if (isgreater((double)(*(struct pointHashElement **)p1)->x, (double)(*(struct pointHashElement **)p2)->x) == 1)
 	{
 		return 1;
 	}
 	// If not check if the second's one has greater value //
-	else if (isless((double)(*(struct pointHashNode **)p1)->x, (double)(*(struct pointHashNode **)p2)->x) == 1)
+	else if (isless((double)(*(struct pointHashElement **)p1)->x, (double)(*(struct pointHashElement **)p2)->x) == 1)
 	{
 		return -1;
 	}
@@ -58,12 +60,12 @@ int point_x_comparator(const void *p1, const void *p2)
 int point_y_comparator(const void *p1, const void *p2)
 {
 	// Check if the first point's coordinate is after the second's //
-	if (isgreater((double)(*(struct pointHashNode **)p1)->y, (double)(*(struct pointHashNode **)p2)->y) == 1)
+	if (isgreater((double)(*(struct pointHashElement **)p1)->y, (double)(*(struct pointHashElement **)p2)->y) == 1)
 	{
 		return 1;
 	}
 	// If not check if the second's one has greater value //
-	else if (isless((double)(*(struct pointHashNode **)p1)->y, (double)(*(struct pointHashNode **)p2)->y) == 1)
+	else if (isless((double)(*(struct pointHashElement **)p1)->y, (double)(*(struct pointHashElement **)p2)->y) == 1)
 	{
 		return -1;
 	}
@@ -144,12 +146,12 @@ void insert_point(char *name, double x, double y)
 	hash = point_hash_function(name) % pointHTSize;
 	
 	// Add the point into the Hash Table //
-	pointHT[hash].nodes = (struct pointHashNode *) realloc(pointHT[hash].nodes, ((pointHT[hash].depth + 1) * sizeof(struct pointHashNode)));
-	assert(pointHT[hash].nodes != NULL);
+	pointHT[hash].bucket = (struct pointHashElement *) realloc(pointHT[hash].bucket, ((pointHT[hash].depth + 1) * sizeof(struct pointHashElement)));
+	assert(pointHT[hash].bucket != NULL);
 
-	pointHT[hash].nodes[pointHT[hash].depth].name = name;
-	pointHT[hash].nodes[pointHT[hash].depth].x = x;
-	pointHT[hash].nodes[pointHT[hash].depth].y = y;
+	pointHT[hash].bucket[pointHT[hash].depth].name = name;
+	pointHT[hash].bucket[pointHT[hash].depth].x = x;
+	pointHT[hash].bucket[pointHT[hash].depth].y = y;
 
 	// Icrease the depth of the bucket for the given hash //
 	pointHT[hash].depth++;
@@ -210,21 +212,21 @@ void rehash_point_hash()
 		for (j = 0; j < oldHash[i].depth; j++)
 		{
 			// Find a new hash based on the new Hash Table //
-			hash = point_hash_function(oldHash[i].nodes[j].name) % pointHTSize;
+			hash = point_hash_function(oldHash[i].bucket[j].name) % pointHTSize;
 
 			// Add the point into the corresponding bucket of the new Hash Table //
-			pointHT[hash].nodes = (struct pointHashNode *) realloc(pointHT[hash].nodes, ((pointHT[hash].depth + 1) * sizeof(struct pointHashNode)));
-			assert(pointHT[hash].nodes != NULL);
+			pointHT[hash].bucket = (struct pointHashElement *) realloc(pointHT[hash].bucket, ((pointHT[hash].depth + 1) * sizeof(struct pointHashElement)));
+			assert(pointHT[hash].bucket != NULL);
 
-			pointHT[hash].nodes[pointHT[hash].depth].name = oldHash[i].nodes[j].name;
-			pointHT[hash].nodes[pointHT[hash].depth].x = oldHash[i].nodes[j].x;
-			pointHT[hash].nodes[pointHT[hash].depth].y = oldHash[i].nodes[j].y;
+			pointHT[hash].bucket[pointHT[hash].depth].name = oldHash[i].bucket[j].name;
+			pointHT[hash].bucket[pointHT[hash].depth].x = oldHash[i].bucket[j].x;
+			pointHT[hash].bucket[pointHT[hash].depth].y = oldHash[i].bucket[j].y;
 
 			pointHT[hash].depth++;
 		}
 
 		// Free the bucket of the old Hash table //
-		free(oldHash[i].nodes);
+		free(oldHash[i].bucket);
 	}
 
 	// Free the old Hash Table //
@@ -242,21 +244,21 @@ inline int get_point_hash_depth(unsigned long hash)
 // Get the x coordinate of a given point //
 inline double get_point_x_coord(unsigned long hash, int depth)
 {
-	return pointHT[hash].nodes[depth].x;
+	return pointHT[hash].bucket[depth].x;
 }
 
 // *** get_point_y_coord *** //
 // Get the y coordinate of a given point //
 inline double get_point_y_coord(unsigned long hash, int depth)
 {
-	return pointHT[hash].nodes[depth].y;
+	return pointHT[hash].bucket[depth].y;
 }
 
 // *** get_point_name *** //
 // Get the name of a given point //
 inline char *get_point_name(unsigned long hash, int depth)
 {
-	return pointHT[hash].nodes[depth].name;
+	return pointHT[hash].bucket[depth].name;
 }
 
 // *** free_point_hash *** //
@@ -287,11 +289,11 @@ void free_point_hash()
 		for (j = 0; j < pointHT[i].depth; j++)
 		{
 			// Free its name //
-			free(pointHT[i].nodes[j].name);
+			free(pointHT[i].bucket[j].name);
 		}
 
 		// Free the bucket
-		free(pointHT[i].nodes);
+		free(pointHT[i].bucket);
 	}
 
 	// Free the Hash Table //
@@ -336,7 +338,7 @@ void print_point_hash()
 			for (j = 0; j < pointHT[i].depth; j++)
 			{
 				// Print is name and coordinates //
-				printf(MAG"\tPoint: "NRM"%s "MAG"("NRM"%.2lf"MAG","NRM"%.2lf"MAG")\r\n"NRM, pointHT[i].nodes[j].name, pointHT[i].nodes[j].x, pointHT[i].nodes[j].y);
+				printf(MAG"\tPoint: "NRM"%s "MAG"("NRM"%.2lf"MAG","NRM"%.2lf"MAG")\r\n"NRM, pointHT[i].bucket[j].name, pointHT[i].bucket[j].x, pointHT[i].bucket[j].y);
 			}
 		}
 		
@@ -374,8 +376,8 @@ void print_point_hash_distances(double x, double y)
 		for (j = 0; j < pointHT[i].depth; j++)
 		{
 			// Find its distance to the given point and print it //
-			distance = euclidean_distance(x, y, pointHT[i].nodes[j].x, pointHT[i].nodes[j].y);
-			printf(RED"--->"NRM"Distance from %s: %lf\r\n", pointHT[i].nodes[j].name, distance);
+			distance = euclidean_distance(x, y, pointHT[i].bucket[j].x, pointHT[i].bucket[j].y);
+			printf(RED"--->"NRM"Distance from %s: %lf\r\n", pointHT[i].bucket[j].name, distance);
 		}
 	}
 }
@@ -397,7 +399,7 @@ void create_sorting_array()
 	}
 
 	// Allocate memory for the array //
-	pointArray = (struct pointHashNode **) calloc(pointArraySize, sizeof(struct pointHashNode *));
+	pointArray = (struct pointHashElement **) calloc(pointArraySize, sizeof(struct pointHashElement *));
 	assert(pointArray != NULL);
 
 	// Second Pass - Fill the array //
@@ -408,7 +410,7 @@ void create_sorting_array()
 		for(j = 0; j < pointHT[i].depth; j++)
 		{
 			// Add a reference to the point into the array //
-			pointArray[k] = &pointHT[i].nodes[j];
+			pointArray[k] = &pointHT[i].bucket[j];
 			k++;
 		}
 	}
@@ -451,46 +453,75 @@ void print_sorting_array()
 // *** create_KD_tree *** //
 void create_KD_tree()
 {
+	unsigned long noofElements = 0;
 	unsigned long split = 0;
-	// Free the previous tree //
+
+	// Free the existing tree //
 	free_KD_tree();
 	
+	// Free the existing sorting array & create a new one //
 	free_sorting_array();
 	create_sorting_array();
 
-	// Create the head of the tree //
-	kdTree = (struct kdNode *) calloc(1, sizeof(struct kdNode));
+	// Create the tree //
+	// The first element of the array will remain empty and is allocated for easier traversal //
+	kdTree = (struct kdTreeNode *) calloc(2, sizeof(struct kdTreeNode));
 	assert(kdTree != NULL);
+	kdTreeSize = 2;
+	kdTreeArraySize = 2;
 
-	kdTree->isLeaf = false;
-	kdTree->axis = true;
-	kdTree->startIndex = 0;
-	kdTree->endIndex = pointArraySize - 1;
+	// kdTree->isLeaf = false;
+	kdTree[1].axis = X_AXIS; // Chose the x axis as the first one to check //
+	kdTree[1].startIndex = 0;
+	kdTree[1].endIndex = pointArraySize - 1;
 
-	// Sort the array based on the x coordinate //
-	qsort((void *)pointArray, pointArraySize, sizeof(struct pointHashNode *), point_x_comparator);
+	// If the elements in the sorting array are more than the defined max //
+	noofElements = kdTree[1].endIndex - kdTree[1].startIndex + 1;
+	if (noofElements > MAX_KDLEAF_ELEMENTS)
+	{
+		// Mark the node as a non leaf one //
+		kdTree[1].isLeaf = 0;
+
+		// Sort the array based on the x coordinate //
+		qsort((void *)pointArray, pointArraySize, sizeof(struct pointHashElement *), point_x_comparator);
 	
-	// Cut the array in two halves //
-	split = pointArraySize / 2;
-	kdTree->splitIndex = pointArray[split];
-	kdTree->left = insert_KD_tree_node(kdTree, kdTree->startIndex, split);
-	kdTree->right = insert_KD_tree_node(kdTree, (split + 1), kdTree->endIndex);
+		// Save the split //
+		split = pointArraySize / 2;
+		kdTree[1].splitReference = pointArray[split];
+
+		// Increase the tree size //
+		kdTree = (struct kdTreeNode *) realloc(kdTree, ((2 * kdTreeArraySize) * sizeof(struct kdTreeNode)));;
+		assert(kdTree != NULL);
+		kdTreeSize += 2; // The new tree will have two more nodes //
+		kdTreeArraySize *= 2; // The array that correspondes to the tree has to be doubled in size //
+
+		// Fill the children nodes //
+		// Left Child
+		insert_KD_tree_node(2, kdTree[1].startIndex, split);
+		// Right Child
+		insert_KD_tree_node(3, (split + 1), kdTree[1].endIndex);
+	}
+	// If they are not //
+	else
+	{
+		// Mark the node as a leaf one //
+		kdTree[1].isLeaf = 1;
+	}
+
+	// kdTree->left = insert_KD_tree_node(kdTree, kdTree->startIndex, split);
+	// kdTree->right = insert_KD_tree_node(kdTree, (split + 1), kdTree->endIndex);
 }
 
 // *** insert_KD_tree_node *** //
-struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startIndex, unsigned long endIndex)
+void insert_KD_tree_node(unsigned long index, unsigned long startIndex, unsigned long endIndex)
 {
 	unsigned long noofElements = 0;
 	unsigned long split = 0;
-	struct kdNode *node = NULL;
+	unsigned long parent = 0;
 
-	// Create the new node //
-	node = (struct kdNode *) calloc(1, sizeof(struct kdNode));
-	assert(node != NULL);
-
-	node->parent = parent;
-	node->startIndex = startIndex;
-	node->endIndex = endIndex;
+	// Fill the new node //
+	kdTree[index].startIndex = startIndex;
+	kdTree[index].endIndex = endIndex;
 
 	// Find the number of elements that correspond to this node //
 	noofElements = endIndex - startIndex + 1;
@@ -498,59 +529,79 @@ struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startInd
 	// If the node has more elements than the defined max //
 	if (noofElements > MAX_KDLEAF_ELEMENTS)
 	{
-		// The node cannote be a leaf node and the elements are split in two to its children //
-		split = startIndex + ((endIndex - startIndex) / 2);
-		node->isLeaf = false;
-		// node->splitIndex = pointArray[split];
-		node->axis = !parent->axis;
-		if (node->axis == true) // x axis //
+		// Mark the node as a non leaf one //
+		kdTree[index].isLeaf = 0;
+		
+		// Define the axis as the one not used by the parent //
+		parent = index / 2;
+		if (kdTree[parent].axis == X_AXIS)
 		{
-			qsort((void *)&pointArray[startIndex], noofElements, sizeof(struct pointHashNode *), point_x_comparator);
+			kdTree[index].axis = Y_AXIS;
 		}
-		else // y axis //
+		else
 		{
-			qsort((void *)&pointArray[startIndex], noofElements, sizeof(struct pointHashNode *), point_y_comparator);
+			kdTree[index].axis = X_AXIS;
 		}
-		node->splitIndex = pointArray[split];
 
-		node->left = insert_KD_tree_node(node, startIndex, split);
-		node->right = insert_KD_tree_node(node, (split + 1), endIndex);
+		// Sort the sub-array depending on the axis //
+		if (kdTree[index].axis == Y_AXIS)
+		{
+			qsort((void *)&pointArray[startIndex], noofElements, sizeof(struct pointHashElement *), point_x_comparator);
+		}
+		else
+
+		{
+			qsort((void *)&pointArray[startIndex], noofElements, sizeof(struct pointHashElement *), point_y_comparator);
+		}
+
+		// Check if the tree has enough space for the new nodes //
+		// If the index of the left new node is greater or //
+		// equal to the size of the tree, double its size  //
+		if ((2 * index) >= kdTreeArraySize)
+		{
+			kdTree = (struct kdTreeNode *) realloc(kdTree, ((2 * kdTreeArraySize) * sizeof(struct kdTreeNode)));
+			assert(kdTree != NULL);
+			kdTreeSize *= 2;
+		}
+
+		// Increase the size of the tree by two //
+		kdTreeSize += 2;
+
+		// Find the index of the split //
+		split = startIndex + ((endIndex - startIndex) / 2);
+
+		// Save the split //
+		kdTree[index].splitReference = pointArray[split];
+
+		// Left Child
+		insert_KD_tree_node((2 * index), startIndex, split);
+		// Right Child
+		insert_KD_tree_node(((2 * index) + 1), (split + 1), endIndex);
 	}
 	else
 	{
-		node->isLeaf = true;
+		// Mark the node as a leaf one //
+		kdTree[index].isLeaf = 1;
 	}
-	
-	return node;
 }
 
 // *** free_KD_tree *** //
 // Free the KD Tree //
 void free_KD_tree()
 {
+	// If the kd tree is empty //
 	if (kdTree == NULL)
 	{
+		// Do nothing //
 		return;
 	}
 
-	free_KD_node(kdTree);
+	// Free the kd tree //
+	free(kdTree);
 	kdTree = NULL;
-}
 
-// *** free_KD_node *** //
-// Free a node of the KD tree //
-void free_KD_node(struct kdNode *node)
-{
-	// If the node is not a leaf one //
-	if (node->isLeaf == false)
-	{
-		// First free its children //
-		free_KD_node(node->left);
-		free_KD_node(node->right);
-	}
-
-	// Free the node //
-	free(node);
+	kdTreeSize = 0;
+	kdTreeArraySize = 0;
 }
 
 // *** print_KD_tree *** //
@@ -564,7 +615,7 @@ void print_KD_tree()
 	}
 
 	printf(MAG"Root:\r\n"NRM);
-	print_KD_node(kdTree, 0);
+	print_KD_node(1, 0);
 }
 
 // *** print_tabs *** //
@@ -584,18 +635,18 @@ inline void print_tabs(int depth)
 // Print a given node of the KD tree in a certain depth. //
 // For the node print its start & end indexes of its     //
 // sub-array and its children, if its not a leaf node.   //
-void print_KD_node(struct kdNode *node, int depth)
+void print_KD_node(unsigned long index, int depth)
 {
 	// Pint the start index of the node's sub-array //
 	print_tabs(depth);
-	printf(BLU"Start Index: "NRM"%lu\r\n", node->startIndex);
+	printf(BLU"Start Index: "NRM"%lu\r\n", kdTree[index].startIndex);
 
 	// Pint the end index of the node's sub-array //
 	print_tabs(depth);
-	printf(BLU"End Index:   "NRM"%lu\r\n", node->endIndex);
+	printf(BLU"End Index:   "NRM"%lu\r\n", kdTree[index].endIndex);
 
 	// Check if the node is leaf //
-	if (node->isLeaf == true)
+	if (kdTree[index].isLeaf == 1)
 	{
 		// Print a corresponding message //
 		print_tabs(depth);
@@ -607,17 +658,17 @@ void print_KD_node(struct kdNode *node, int depth)
 		// First the left child //
 		print_tabs(depth);
 		printf(MAG"\tLeft child:\r\n");
-		print_KD_node(node->left, (depth + 1));
+		print_KD_node((2 * index), (depth + 1));
 
 		// Then the right //
 		print_tabs(depth);
 		printf(MAG"\tRight child:\r\n");
-		print_KD_node(node->right, (depth + 1));
+		print_KD_node((2 * index + 1), (depth + 1));
 	}
 }
 
 // *** find_nearest_neighbour *** //
-unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
+unsigned long find_nearest_neighbour(unsigned long index, double x, double y)
 {
 	double minDistance = 0;
 	double distance = 0;
@@ -626,16 +677,16 @@ unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 	unsigned long i;
 
 	// Check if the node is a leaf one //
-	if (node->isLeaf == true)
+	if (kdTree[index].isLeaf == 1)
 	{
 		// Find the point with the smallest distance between the points of the leaf //
 
 		// Start by assuming the first node has the smallest distance //
-		minIndex = node->startIndex; 
+		minIndex = kdTree[index].startIndex; 
 		minDistance = euclidean_distance(x, y, pointArray[minIndex]->x, pointArray[minIndex]->y);
 		
 		// Run through the rest of the points //
-		for (i = (node->startIndex + 1); i <= node->endIndex; i++)
+		for (i = (kdTree[index].startIndex + 1); i <= kdTree[index].endIndex; i++)
 		{
 			// If a point's distance is less than the current minimum distance //
 			distance = euclidean_distance(x, y, pointArray[i]->x, pointArray[i]->y);
@@ -652,20 +703,20 @@ unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 	{
 		// Check the axis //
 		// For the x axis //
-		if (node->axis == true)
+		if (kdTree[index].axis == X_AXIS)
 		{
 			// If the given x coordinate is after the split //
-			if (isgreater(x, node->splitIndex->x))
+			if (isgreater(x, kdTree[index].splitReference->x))
 			{
 				// Find the nearest neighbour on this half //
-				minIndex = find_nearest_neighbour(node->right, x, y);
+				minIndex = find_nearest_neighbour(((2 * index) + 1), x, y);
 				
 				// If the distance between the given x and the split is less than the minimum distance //
 				minDistance = euclidean_distance(x, y, pointArray[minIndex]->x, pointArray[minIndex]->y);
-				if (isless(fabs(x - node->splitIndex->x), minDistance) == 1)
+				if (isless(fabs(x - kdTree[index].splitReference->x), minDistance) == 1)
 				{
 					// Find the nearest neighbour on the other half and compare it with the previous //
-					secondIndex = find_nearest_neighbour(node->left, x, y);
+					secondIndex = find_nearest_neighbour((2 * index), x, y);
 					distance = euclidean_distance(x, y, pointArray[secondIndex]->x, pointArray[secondIndex]->y);
 
 					// If the new distance is less //
@@ -680,14 +731,14 @@ unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 			else
 			{
 				// Find the nearest neighbour on this half //
-				minIndex = find_nearest_neighbour(node->left, x, y);
+				minIndex = find_nearest_neighbour((2 * index), x, y);
 				
 				// If the distance between the given x and the split is less than the minimum distance //
 				minDistance = euclidean_distance(x, y, pointArray[minIndex]->x, pointArray[minIndex]->y);
-				if (isless(fabs(x - node->splitIndex->x), minDistance) == 1)
+				if (isless(fabs(x - kdTree[index].splitReference->x), minDistance) == 1)
 				{
 					// Find the nearest neighbour on the other half and compare it with the previous //
-					secondIndex = find_nearest_neighbour(node->right, x, y);
+					secondIndex = find_nearest_neighbour(((2 * index) + 1), x, y);
 					distance = euclidean_distance(x, y, pointArray[secondIndex]->x, pointArray[secondIndex]->y);
 
 					// If the new distance is less //
@@ -703,17 +754,17 @@ unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 		else
 		{
 			// If the given y coordinate is after the split //
-			if (isgreater(y, node->splitIndex->y))
+			if (isgreater(y, kdTree[index].splitReference->y))
 			{
 				// Find the nearest neighbour on this half //
-				minIndex = find_nearest_neighbour(node->right, x, y);
+				minIndex = find_nearest_neighbour(((2 * index) + 1), x, y);
 				
 				// If the distance between the given y and the split is less than the minimum distance //
 				minDistance = euclidean_distance(x, y, pointArray[minIndex]->x, pointArray[minIndex]->y);
-				if (isless(fabs(y - node->splitIndex->y), minDistance) == 1)
+				if (isless(fabs(y - kdTree[index].splitReference->y), minDistance) == 1)
 				{
 					// Find the nearest neighbour on the other half and compare it with the previous //
-					secondIndex = find_nearest_neighbour(node->left, x, y);
+					secondIndex = find_nearest_neighbour((2 * index), x, y);
 					distance = euclidean_distance(x, y, pointArray[secondIndex]->x, pointArray[secondIndex]->y);
 					
 					// If the new distance is less //
@@ -728,14 +779,14 @@ unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 			else
 			{
 				// Find the nearest neighbour on this half //
-				minIndex = find_nearest_neighbour(node->left, x, y);
+				minIndex = find_nearest_neighbour((2 * index), x, y);
 				
 				// If the distance between the given y and the split is less than the minimum distance //
 				minDistance = euclidean_distance(x, y, pointArray[minIndex]->x, pointArray[minIndex]->y);
-				if (isless(fabs(y - node->splitIndex->y), minDistance) == 1)
+				if (isless(fabs(y - kdTree[index].splitReference->y), minDistance) == 1)
 				{
 					// Find the nearest neighbour on the other half and compare it with the previous //
-					secondIndex = find_nearest_neighbour(node->right, x, y);
+					secondIndex = find_nearest_neighbour(((2 * index) + 1), x, y);
 					distance = euclidean_distance(x, y, pointArray[secondIndex]->x, pointArray[secondIndex]->y);
 					
 					// If the new distance is less //
@@ -752,9 +803,14 @@ unsigned long find_nearest_neighbour(struct kdNode *node, double x, double y)
 	return minIndex;
 }
 
+// *** print_nearest *** //
+void print_nearest_neighbor(double x, double y)
+{
+	printf("\r\nNearest Neighbor: %s\r\n\n", pointArray[find_nearest_neighbour(ROOT_NODE, x, y)]->name);
+}
 
 // *** find_nearest_neighbours_within_radius *** //
-unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double x, double y, double radius, unsigned long *noofNeighbors)
+unsigned long *find_nearest_neighbours_within_radius(unsigned long index, double x, double y, double radius, unsigned long *noofNeighbors)
 {
 	double distance = 0;
 	unsigned long *indexes = NULL;
@@ -764,10 +820,10 @@ unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double
 	unsigned long i;
 
 	// Check if the node is a leaf one //
-	if (node->isLeaf == true)
+	if (kdTree[index].isLeaf == 1)
 	{
 		// Run through the points //
-		for (i = node->startIndex; i <= node->endIndex; i++)
+		for (i = kdTree[index].startIndex; i <= kdTree[index].endIndex; i++)
 		{
 			// Find the distance between point and given coordinates //
 			distance = euclidean_distance(x, y, pointArray[i]->x, pointArray[i]->y);
@@ -789,19 +845,19 @@ unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double
 	{
 		// Check the axis //
 		// For the x axis //
-		if (node->axis == true)
+		if (kdTree[index].axis == X_AXIS)
 		{
 			// If the given x coordinate is after the split //
-			if (isgreater(x, node->splitIndex->x))
+			if (isgreater(x, kdTree[index].splitReference->x))
 			{
 				// Find a list of points that are within radius on this half //
-				indexes = find_nearest_neighbours_within_radius(node->right, x, y, radius, &noofIndexes);
+				indexes = find_nearest_neighbours_within_radius(((2 * index) + 1), x, y, radius, &noofIndexes);
 				
 				// If the distance between the given x and the split is less or equal with the radius //
-				if (islessequal(fabs(x - node->splitIndex->x), radius) == 1)
+				if (islessequal(fabs(x - kdTree[index].splitReference->x), radius) == 1)
 				{
 					// Find if there are points within the range on the other half //
-					newIndexes = find_nearest_neighbours_within_radius(node->left, x, y, radius, &noofNewIndexes);
+					newIndexes = find_nearest_neighbours_within_radius((2 * index), x, y, radius, &noofNewIndexes);
 
 					// If there are //
 					if (newIndexes != NULL)
@@ -818,13 +874,13 @@ unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double
 			else
 			{
 				// Find a list of points that are within radius on this half //
-				indexes = find_nearest_neighbours_within_radius(node->left, x, y, radius, &noofIndexes);
+				indexes = find_nearest_neighbours_within_radius((2 * index), x, y, radius, &noofIndexes);
 				
 				// If the distance between the given x and the split is less or equal with the radius //
-				if (islessequal(fabs(x - node->splitIndex->x), radius) == 1)
+				if (islessequal(fabs(x - kdTree[index].splitReference->x), radius) == 1)
 				{
 					// Find if there are points within the range on the other half //
-					newIndexes = find_nearest_neighbours_within_radius(node->right, x, y, radius, &noofNewIndexes);
+					newIndexes = find_nearest_neighbours_within_radius(((2 * index) + 1), x, y, radius, &noofNewIndexes);
 
 					// If there are //
 					if (newIndexes != NULL)
@@ -842,16 +898,16 @@ unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double
 		else
 		{
 			// If the given y coordinate is after the split //
-			if (isgreater(y, node->splitIndex->y))
+			if (isgreater(y, kdTree[index].splitReference->y))
 			{
 				// Find a list of points that are within radius on this half //
-				indexes = find_nearest_neighbours_within_radius(node->right, x, y, radius, &noofIndexes);
+				indexes = find_nearest_neighbours_within_radius(((2 * index) + 1), x, y, radius, &noofIndexes);
 				
 				// If the distance between the given y and the split is less or equal with the radius //
-				if (islessequal(fabs(y - node->splitIndex->y), radius) == 1)
+				if (islessequal(fabs(y - kdTree[index].splitReference->y), radius) == 1)
 				{
 					// Find if there are points within the range on the other half //
-					newIndexes = find_nearest_neighbours_within_radius(node->left, x, y, radius, &noofNewIndexes);
+					newIndexes = find_nearest_neighbours_within_radius((2 * index), x, y, radius, &noofNewIndexes);
 					
 					// If there are //
 					if (newIndexes != NULL)
@@ -868,13 +924,13 @@ unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double
 			else
 			{
 				// Find a list of points that are within radius on this half //
-				indexes = find_nearest_neighbours_within_radius(node->left, x, y, radius, &noofIndexes);
+				indexes = find_nearest_neighbours_within_radius((2 * index), x, y, radius, &noofIndexes);
 				
 				// If the distance between the given x and the split is less or equal with the radius //
-				if (islessequal(fabs(y - node->splitIndex->y), radius) == 1)
+				if (islessequal(fabs(y - kdTree[index].splitReference->y), radius) == 1)
 				{
 					// Find if there are points within the range on the other half //
-					newIndexes = find_nearest_neighbours_within_radius(node->right, x, y, radius, &noofNewIndexes);
+					newIndexes = find_nearest_neighbours_within_radius(((2 * index) + 1), x, y, radius, &noofNewIndexes);
 					
 					// If there are //
 					if (newIndexes != NULL)
@@ -897,8 +953,35 @@ unsigned long *find_nearest_neighbours_within_radius(struct kdNode *node, double
 	return indexes;
 }
 
-// *** find_n_nearest_neighbours *** //
-unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y, unsigned long n, unsigned long *noofNeighbors)
+// *** print_nearest_neighbours_within_radius *** //
+void print_nearest_neighbours_within_radius(double x, double y, double radius)
+{
+	unsigned long *indexes = NULL;
+	unsigned long i = 0;
+	unsigned long noofIndexes = 0;
+
+	indexes = find_nearest_neighbours_within_radius(ROOT_NODE, x, y, radius, &noofIndexes);
+	
+	if (indexes != NULL)
+	{
+		printf("\r\nNeighbors within radius:\r\n");
+
+		for (i = 0; i < noofIndexes; i++)
+		{
+			printf("\t%s\r\n", pointArray[indexes[i]]->name);
+		}
+
+		putchar('\n');
+		free(indexes);
+	}
+	else
+	{
+		printf(YEL"\r\nNo neighbors within radius!\r\n\n"NRM);
+	}
+}
+
+// *** find_k_nearest_neighbours *** //
+unsigned long *find_k_nearest_neighbours(unsigned long index, double x, double y, unsigned long k, unsigned long *noofNeighbors)
 {
 	unsigned long *indexes = NULL;
 	unsigned long *newIndexes = NULL;
@@ -912,29 +995,29 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 	tempY = y;
 
 	// Check if the node is a leaf one //
-	if (node->isLeaf == true)
+	if (kdTree[index].isLeaf == true)
 	{
 		// Create an array the size of all the points designated to the leaf //
-		noofIndexes = node->endIndex - node->startIndex + 1;
+		noofIndexes = kdTree[index].endIndex - kdTree[index].startIndex + 1;
 		indexes = (unsigned long *) calloc(noofIndexes, sizeof(unsigned long));
 		assert(indexes != NULL);
 
 		// Run through the array //
-		for (i = 0, j = node->startIndex; j <= node->endIndex; i++, j++)
+		for (i = 0, j = kdTree[index].startIndex; j <= kdTree[index].endIndex; i++, j++)
 		{
 			// Fill it with the indexes of the points //
 			indexes[i] = j;
 		}
 
 		// Sort the array of indexes based on their distance from the given coordinates //
-		qsort(indexes, noofIndexes, sizeof(struct pointHashNode *), distance_comparator);
+		qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
 
 		// If the number of indexes in the leaf exceed the number of required neighbors //
-		if (noofIndexes > n)
+		if (noofIndexes > k)
 		{
 			// Shrink the array to the required size //
-			indexes = (unsigned long *) realloc(indexes, n * sizeof(unsigned long));
-			noofIndexes = n;
+			indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
+			noofIndexes = k;
 		}
 	}
 	// If it is not //
@@ -942,62 +1025,80 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 	{
 		// Check the axis //
 		// For the x axis //
-		if (node->axis == true)
+		if (kdTree[index].axis == X_AXIS)
 		{
 			// If the given x coordinate is after the split //
-			if (isgreater(x, node->splitIndex->x))
+			if (isgreater(x, kdTree[index].splitReference->x))
 			{
 				// Find the nearest points on this half //
-				indexes = find_n_nearest_neighbours(node->right, x, y, n, &noofIndexes);
-				
-				// If the distance between the given x and the distance of the furthest point is less or equal with the radius //
-				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
-				if (isless(fabs(x - node->splitIndex->x), distance) == 1)
-				{
-					newIndexes = find_n_nearest_neighbours(node->left, x, y, n, &noofNewIndexes);
-					if (newIndexes != NULL)
-					{
-						indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
-						assert(indexes != NULL);
-						memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-						noofIndexes += noofNewIndexes;
+				indexes = find_k_nearest_neighbours(((2 * index) + 1), x, y, k, &noofIndexes);
 
-						qsort(indexes, noofIndexes, sizeof(struct pointHashNode *), distance_comparator);
-						if (noofIndexes > n)
-						{
-							indexes = (unsigned long *) realloc(indexes, n * sizeof(unsigned long));
-							assert(indexes != NULL);
-							noofIndexes = n;
-						}
-					}
+				// If the distance between the given x and the furthest point is //
+				// less or equal the distance between the given x and the split  //
+				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
+				if (isless(fabs(x - kdTree[index].splitReference->x), distance) == 1)
+				{
+					// Find the nearest points on the other half //
+					newIndexes = find_k_nearest_neighbours((index * 2), x, y, k, &noofNewIndexes);
+					assert(newIndexes != NULL);
+
+					// Expand the current array //
+					indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+					assert(indexes != NULL);
+
+					// Add all the found points into the array //
+					memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
 					free(newIndexes);
+					noofIndexes += noofNewIndexes;
+
+					// Sort the array //
+					qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+
+					// If the number of fouund points exceed the requested number //
+					if (noofIndexes > k)
+					{
+						// Keep only the k nearest points //
+						indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
+						assert(indexes != NULL);
+						noofIndexes = k;
+					}
 				}
 			}
 			// If the given x coordinate is before or on the split //
 			else
 			{
 				// Find the nearest points on this half //
-				indexes = find_n_nearest_neighbours(node->left, x, y, n, &noofIndexes);
-				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
-				if (isless(fabs(x - node->splitIndex->x), distance) == 1)
-				{
-					newIndexes = find_n_nearest_neighbours(node->right, x, y, n, &noofNewIndexes);
-					if (newIndexes != NULL)
-					{
-						indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
-						assert(indexes != NULL);
-						memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-						noofIndexes += noofNewIndexes;
+				indexes = find_k_nearest_neighbours((index * 2), x, y, k, &noofIndexes);
 
-						qsort(indexes, noofIndexes, sizeof(struct pointHashNode *), distance_comparator);
-						if (noofIndexes > n)
-						{
-							indexes = (unsigned long *) realloc(indexes, n * sizeof(unsigned long));
-							assert(indexes != NULL);
-							noofIndexes = n;
-						}
-					}
+				// If the distance between the given x and the furthest point is //
+				// less or equal the distance between the given x and the split  //
+				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
+				if (isless(fabs(x - kdTree[index].splitReference->x), distance) == 1)
+				{
+					// Find the nearest points on the other half //
+					newIndexes = find_k_nearest_neighbours(((2 * index) + 1), x, y, k, &noofNewIndexes);
+					assert(newIndexes != NULL);
+
+					// Expand the current array //
+					indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+					assert(indexes != NULL);
+
+					// Add all the found points into the array //
+					memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
 					free(newIndexes);
+					noofIndexes += noofNewIndexes;
+
+					// Sort the array //
+					qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+
+					// If the number of fouund points exceed the requested number //
+					if (noofIndexes > k)
+					{
+						// Keep only the k nearest points //
+						indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
+						assert(indexes != NULL);
+						noofIndexes = k;
+					}
 				}
 			}
 		}
@@ -1005,57 +1106,77 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 		else
 		{
 			// If the given y coordinate is after the split //
-			if (isgreater(y, node->splitIndex->y))
+			if (isgreater(y, kdTree[index].splitReference->y))
 			{
 				// Find the nearest points on this half //
-				indexes = find_n_nearest_neighbours(node->right, x, y, n, &noofIndexes);
-				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
-				if (isless(fabs(y - node->splitIndex->y), distance) == 1)
-				{
-					newIndexes = find_n_nearest_neighbours(node->left, x, y, n, &noofNewIndexes);
-					if (newIndexes != NULL)
-					{
-						indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
-						assert(indexes != NULL);
-						memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-						noofIndexes += noofNewIndexes;
+				indexes = find_k_nearest_neighbours(((2 * index) + 1), x, y, k, &noofIndexes);
 
-						qsort(indexes, noofIndexes, sizeof(struct pointHashNode *), distance_comparator);
-						if (noofIndexes > n)
-						{
-							indexes = (unsigned long *) realloc(indexes, n * sizeof(unsigned long));
-							assert(indexes != NULL);
-							noofIndexes = n;
-						}
-					}
+				// If the distance between the given y and the furthest point is //
+				// less or equal the distance between the given y and the split  //
+				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
+				if (isless(fabs(y - kdTree[index].splitReference->y), distance) == 1)
+				{
+					// Find the nearest points on the other half //
+					newIndexes = find_k_nearest_neighbours((index * 2), x, y, k, &noofNewIndexes);
+					assert(newIndexes != NULL);
+
+					// Expand the current array //
+					indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+					assert(indexes != NULL);
+
+					// Add all the found points into the array //
+					memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
 					free(newIndexes);
+					noofIndexes += noofNewIndexes;
+
+					// Sort the array //
+					qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+
+					// If the number of fouund points exceed the requested number //
+					if (noofIndexes > k)
+					{
+						// Keep only the n nearest points //
+						indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
+						assert(indexes != NULL);
+						noofIndexes = k;
+					}
 				}
 			}
 			// If the given y coordinate is before or on the split //
 			else
 			{
 				// Find the nearest points on this half //
-				indexes = find_n_nearest_neighbours(node->left, x, y, n, &noofIndexes);
-				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
-				if (isless(fabs(y - node->splitIndex->y), distance) == 1)
-				{
-					newIndexes = find_n_nearest_neighbours(node->right, x, y, n, &noofNewIndexes);
-					if (newIndexes != NULL)
-					{
-						indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
-						assert(indexes != NULL);
-						memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-						noofIndexes += noofNewIndexes;
+				indexes = find_k_nearest_neighbours((index * 2), x, y, k, &noofIndexes);
 
-						qsort(indexes, noofIndexes, sizeof(struct pointHashNode *), distance_comparator);
-						if (noofIndexes > n)
-						{
-							indexes = (unsigned long *) realloc(indexes, n * sizeof(unsigned long));
-							assert(indexes != NULL);
-							noofIndexes = n;
-						}
-					}
+				// If the distance between the given y and the furthest point is //
+				// less or equal the distance between the given y and the split  //
+				distance = euclidean_distance(x, y, pointArray[indexes[noofIndexes - 1]]->x, pointArray[indexes[noofIndexes - 1]]->y);
+				if (isless(fabs(y - kdTree[index].splitReference->y), distance) == 1)
+				{
+					// Find the nearest points on the other half //
+					newIndexes = find_k_nearest_neighbours(((2 * index) + 1), x, y, k, &noofNewIndexes);
+					assert(newIndexes != NULL);
+
+					// Expand the current array //
+					indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+					assert(indexes != NULL);
+
+					// Add all the found points into the array //
+					memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
 					free(newIndexes);
+					noofIndexes += noofNewIndexes;
+
+					// Sort the array //
+					qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+
+					// If the number of fouund points exceed the requested number //
+					if (noofIndexes > k)
+					{
+						// Keep only the k nearest points //
+						indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
+						assert(indexes != NULL);
+						noofIndexes = k;
+					}
 				}
 			}
 		}
@@ -1068,9 +1189,23 @@ unsigned long *find_n_nearest_neighbours(struct kdNode *node, double x, double y
 	return indexes;
 }
 
-// *** print_nearest *** //
-void print_nearest(double x, double y)
+// *** print_k_nearest_neighbours *** //
+void print_k_nearest_neighbours(double x, double y, unsigned long k)
 {
-	create_KD_tree();
-	printf("\r\nNearest Point: %s\r\n\n", pointArray[find_nearest_neighbour(kdTree, x, y)]->name);
+	unsigned long *indexes = NULL;
+	unsigned long i = 0;
+	unsigned long noofIndexes = 0;
+
+	indexes = find_k_nearest_neighbours(ROOT_NODE, x, y, k, &noofIndexes);
+	assert(indexes != NULL);
+
+	printf("\r\nNearest Neighbors:\r\n");
+
+	for (i = 0; i < noofIndexes; i++)
+	{
+		printf("\t%s\r\n", pointArray[indexes[i]]->name);
+	}
+
+	putchar('\n');
+	free(indexes);
 }

@@ -181,6 +181,7 @@ int create_kdTree(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *
 	return TCL_OK;
 }
 
+// *** find_NN *** //
 int find_NN(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "<x-coord> <y-coord>";
@@ -196,11 +197,18 @@ int find_NN(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const 
 	Tcl_GetDouble(interp, Tcl_GetString(argv[1]), &x);
 	Tcl_GetDouble(interp, Tcl_GetString(argv[2]), &x);
 
-	print_nearest(x, y);
+	#ifdef DEBUG
+	{
+		print_point_hash_distances(x, y);
+	}
+	#endif
+
+	print_nearest_neighbor(x, y);
 
 	return TCL_OK;
 }
 
+// *** clear_points *** //
 int clear_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "";
@@ -218,14 +226,12 @@ int clear_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *c
 	return TCL_OK;
 }
 
+// *** find_nearest_neighbours *** //
 int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "[-k <noof_neighbors> | -r <radius>] -point <x-coord> <y-coord>";
-	unsigned long *indexes = NULL;
 	unsigned long k = 0;
 	unsigned long r = 0;
-	unsigned long i = 0;
-	unsigned long noofIndexes = 0;
 	double x = 0;
 	double y = 0;
 
@@ -235,7 +241,7 @@ int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc,
 		return TCL_ERROR;
 	}
 
-	Tcl_GetLongFromObj(interp, argv[2], &k);
+	Tcl_GetLongFromObj(interp, argv[2], (long *)&k);
 	Tcl_GetDouble(interp, Tcl_GetString(argv[4]), &x);
 	Tcl_GetDouble(interp, Tcl_GetString(argv[5]), &y);
 
@@ -245,41 +251,33 @@ int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc,
 	}
 	else if (k == 1)
 	{
-		print_point_hash_distances(x, y);
-		print_nearest(x, y);
+		#ifdef DEBUG
+		{
+			print_point_hash_distances(x, y);
+		}
+		#endif
+
+		print_nearest_neighbor(x, y);
 	}
 	else
 	{
-		create_KD_tree();
-		print_point_hash_distances(x, y);
-		indexes = find_n_nearest_neighbours(kdTree, x, y, k, &noofIndexes);
-		assert(indexes != NULL);
-
-		if (indexes != NULL)
+		#ifdef DEBUG
 		{
-			for (i = 0; i < noofIndexes; i++)
-			{
-				printf("\t%s\n", pointArray[indexes[i]]->name);
-			}
+			print_point_hash_distances(x, y);
+		}
+		#endif
 
-			free(indexes);
-		}
-		else
-		{
-			printf(YEL"No neighbors within radius!\n"NRM);
-		}
+		print_k_nearest_neighbours(x, y, k);
 	}
 
 	return TCL_OK;
 }
 
+// *** find_neighbours_within_radius *** //
 int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "[-r <radius> -point <x-coord> <y-coord>";
-	unsigned long *indexes = NULL;
-	unsigned long r = 0;
-	unsigned long i = 0;
-	unsigned long noofIndexes = 0;
+	double radius = 0;
 	double x = 0;
 	double y = 0;
 
@@ -289,39 +287,29 @@ int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int
 		return TCL_ERROR;
 	}
 
-	Tcl_GetLongFromObj(interp, argv[2], &r);
+	Tcl_GetDouble(interp, Tcl_GetString(argv[2]), &radius);;
 	Tcl_GetDouble(interp, Tcl_GetString(argv[4]), &x);
 	Tcl_GetDouble(interp, Tcl_GetString(argv[5]), &y);
 
-	if (r <= 0)
+	if (radius <= 0)
 	{
 		return TCL_ERROR;
 	}
 	else
 	{
-		create_KD_tree();
-
-		print_point_hash_distances(x, y);
-
-		indexes = find_nearest_neighbours_within_radius(kdTree, x, y, r, &noofIndexes);
-		if (indexes != NULL)
+		#ifdef DEBUG
 		{
-			for (i = 0; i < noofIndexes; i++)
-			{
-				printf("\t%s\n", pointArray[indexes[i]]->name);
-			}
+			print_point_hash_distances(x, y);
+		}
+		#endif
 
-			free(indexes);
-		}
-		else
-		{
-			printf(YEL"No neighbors within radius!\n"NRM);
-		}
+		print_nearest_neighbours_within_radius(x, y, radius);
 	}
 
 	return TCL_OK;
 }
 
+// *** print_array *** //
 int print_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "";

@@ -13,34 +13,42 @@
 // Definitions //
 #define MAX_HASH_DEPTH 10
 #define MAX_KDLEAF_ELEMENTS 5
+
+#define ROOT_NODE 1
+
+#define X_AXIS 0
+#define Y_AXIS 1
+
 #define CELL_WIDTH    1.260
 #define CELL_HEIGHT   0.576
 
-// Structs for Points //
+// Structuress for Points //
 
-struct pointHashNode
+struct pointHashElement
 {
-    char *name;
-    double x;
-	double y;
+    char *name; // Name of the point //
+    double x;   // x coordinate //
+	double y;   // y coordinate //
 };
 
 struct pointHash
 {
-    struct pointHashNode *nodes;
-    unsigned int depth;
+    struct pointHashElement *bucket; // Hash Table Bucket //
+    unsigned int depth;              // Number of points into the bucket //
 };
 
-struct kdNode
+struct kdTreeNode
 {
-	bool isLeaf;
-	bool axis; // true for x & false for y //
-	unsigned long startIndex;
-	unsigned long endIndex;
-	struct pointHashNode *splitIndex;
-	struct kdNode *left;
-	struct kdNode *right;
-	struct kdNode *parent;
+	int isLeaf;               // Flag used to determine if the node is a leaf //
+	int axis;                 // Defines the axis checked by this node //
+	unsigned long startIndex; // Starting Index of the node's sub-array //
+	unsigned long endIndex;   // Ending Index of the node's sub-array //
+	struct pointHashElement *splitReference; // Pointer to the point used to split the index //
+	                                         // The pointer is used to access the point and  // 
+	                                         // use its coordinates for the algorithms       //
+	// struct kdTreeNode *left;
+	// struct kdTreeNode *right;
+	// struct kdTreeNode *parent;
 };
 
 // End //
@@ -112,11 +120,20 @@ void free_sorting_array();
 void print_sorting_array();
 
 void create_KD_tree();
-struct kdNode *insert_KD_tree_node(struct kdNode *parent, unsigned long startIndex, unsigned long endIndex);
+void insert_KD_tree_node(unsigned long index, unsigned long startIndex, unsigned long endIndex);
 void free_KD_tree();
-void free_KD_node(struct kdNode *node);
+
 void print_KD_tree();
 void print_tabs(int depth);
-void print_KD_node(struct kdNode *node, int depth);
+void print_KD_node(unsigned long index, int depth);
+
+unsigned long find_nearest_neighbour(unsigned long index, double x, double y);
+void print_nearest_neighbor(double x, double y);
+
+unsigned long *find_nearest_neighbours_within_radius(unsigned long index, double x, double y, double radius, unsigned long *noofNeighbors);
+void print_nearest_neighbours_within_radius(double x, double y, double range);
+
+unsigned long *find_k_nearest_neighbours(unsigned long index, double x, double y, unsigned long n, unsigned long *noofNeighbors);
+void print_k_nearest_neighbours(double x, double y, unsigned long k);
 
 #endif

@@ -241,7 +241,7 @@ static void mousebutton(GtkWidget *widget, GdkEventButton *eev, gpointer data)
 			x = ((guint)e->x - CANVASWIDTHOFFSET + maincanvasOx) / (ratio * zoomvalue) ;
 			y = ((guint)e->y - CANVASHEIGHTOFFSET + maincanvasOy) / (ratio * zoomvalue) ;
 			printf("New Coordinates: (%lf,%lf)\r\n", x, y);
-			print_nearest(x, y);
+			print_nearest_neighbor(x, y);
 		}
 	}
 

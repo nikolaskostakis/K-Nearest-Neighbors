@@ -71,9 +71,12 @@ extern double pointMaxYCoordinate;
 extern unsigned long pointHTSize;
 
 // External Functions //
+
+// From structs //
 extern int get_point_hash_depth(unsigned long hash);
 extern double get_point_x_coord(unsigned long hash, int depth);
 extern double get_point_y_coord(unsigned long hash, int depth);
 extern char *get_point_name(unsigned long hash, int depth);
-extern void print_nearest(double x, double y);
+extern void print_nearest_neighbor(double x, double y);
+
 #endif

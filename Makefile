@@ -25,6 +25,9 @@ knn: EXEC_FOOTER := $(GUI_FOOTER) $(MATH) $(TCL) $(READLINE)
 knn: $(OBJ)
 	$(CC) $(CFLAGS) $(EXEC_HEADER) $^ -o $@ $(EXEC_FOOTER)
 
+debug: CFLAGS += -DDEBUG
+debug: knn
+
 build/main.o: CFLAGS += -c
 build/main.o: src/main.c src/main.h
 	@ mkdir -p build
