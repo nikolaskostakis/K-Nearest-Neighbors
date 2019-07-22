@@ -46,48 +46,10 @@ struct kdTreeNode
 	struct pointHashElement *splitReference; // Pointer to the point used to split the index //
 	                                         // The pointer is used to access the point and  // 
 	                                         // use its coordinates for the algorithms       //
-	// struct kdTreeNode *left;
-	// struct kdTreeNode *right;
-	// struct kdTreeNode *parent;
 };
 
 // End //
 
-// Structs for Design //
-
-enum struct_type {nothing = 0, io, component};
-
-// Design Row //
-struct row
-{
-	char *name;
-	char *type;
-	// Starting Point of the Row
-	double location_x;
-	double location_y;
-	// Size
-	double width;
-	double height;
-};
-
-// Design I/O Pins //
-struct io
-{
-	char *name;
-	// Location
-	double x;
-	double y;
-};
-
-// Design Components/Cells //
-struct component
-{
-	char *name;
-
-	// Location (Top Left)
-	double x;
-	double y;
-};
 
 // P2P Net //
 struct net
