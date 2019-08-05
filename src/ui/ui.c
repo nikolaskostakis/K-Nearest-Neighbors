@@ -33,9 +33,9 @@ double ratio = 0;
 // Expose-Event Paint Function for maincanvas //
 static void expose(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
-	#ifdef DEBUGMODE
+	#ifdef DEBUG
 	{
-		printf("DEBUG: Canvas Expose\r\n");
+		printf(RED"DEBUG: "NRM"Canvas Expose\r\n");
 	}
 	#endif  
 
@@ -70,36 +70,62 @@ void draw_maincancas()
 void draw_shapes()
 {
 	unsigned long i;
-	int j;
 	double xRatio, yRatio;
-	double x,y;
+	double x, y;
+	double w, h;
 	cairo_text_extents_t te;
 
-	if (pointHTSize != 0)
+	if (elementArraySize != 0)
 	{
-		xRatio = floor((maincanvasWidth - (2 * CANVASWIDTHOFFSET)) / pointMaxXCoordinate);
-		yRatio = floor((maincanvasHeight - (2 * CANVASHEIGHTOFFSET)) / pointMaxYCoordinate);
+		xRatio = ((maincanvasWidth - (2 * CANVASWIDTHOFFSET)) / pointMaxXCoordinate);
+		yRatio = ((maincanvasHeight - (2 * CANVASHEIGHTOFFSET)) / pointMaxYCoordinate);
 		ratio = (xRatio < yRatio) ? xRatio : yRatio;
-		
-		for (i = 0; i < pointHTSize; i++)
+
+		for (i = 0; i < elementArraySize; i++)
 		{
-			for (j = 0; j < get_point_hash_depth(i); j++)
+			// The Coordinates //
+			x = CANVASWIDTHOFFSET + (get_element_x(i) * ratio)*zoomvalue - maincanvasOx;
+			y = CANVASHEIGHTOFFSET + (get_element_y(i) * ratio)*zoomvalue - maincanvasOy;
+			w = get_element_width(i) * ratio * zoomvalue;
+			h = get_element_height(i) * ratio * zoomvalue;
+
+			if (get_element_type(i) == 0)
 			{
-				// The Coordinates of the point //
-				x = CANVASWIDTHOFFSET + (get_point_x_coord(i, j) * ratio)*zoomvalue - maincanvasOx;
-				y = CANVASHEIGHTOFFSET + (get_point_y_coord(i, j) * ratio)*zoomvalue - maincanvasOy;
-				
-				// Draw the point //
+				cairo_set_source_rgb(maincanvas_cs, 0, 1, 0);
+				cairo_rectangle(maincanvas_cs, x, y, w, h);
+				cairo_stroke(maincanvas_cs);
+
+				cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
+				cairo_select_font_face(maincanvas_cs, "Georgia", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+				cairo_set_font_size(maincanvas_cs, 1 * ratio * zoomvalue);
+				cairo_text_extents(maincanvas_cs, get_element_name(i), &te);
+				cairo_move_to(maincanvas_cs, x + w/2, y + h/2);
+				cairo_show_text(maincanvas_cs, get_element_name(i));
+			}
+			else if (get_element_type(i) == 1)
+			{
+				cairo_set_source_rgb(maincanvas_cs, 1, 0, 1);
+				cairo_rectangle(maincanvas_cs, x, y, w, h);
+				cairo_stroke(maincanvas_cs);
+			}
+			else if (get_element_type(i) == 2)
+			{
+				cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
+				cairo_rectangle(maincanvas_cs, x, y, w, h);
+				cairo_stroke(maincanvas_cs);
+			}
+			else
+			{
 				cairo_arc(maincanvas_cs, x, y, (POINT_DIAMETER * zoomvalue), 0, 2 * M_PI);
 				cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
 				cairo_fill(maincanvas_cs);
 
 				cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
 				cairo_select_font_face(maincanvas_cs, "Georgia", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-				cairo_set_font_size(maincanvas_cs, 15*zoomvalue);
-				cairo_text_extents(maincanvas_cs, get_point_name(i, j), &te);
+				cairo_set_font_size(maincanvas_cs, 0.3 * ratio * zoomvalue);
+				cairo_text_extents(maincanvas_cs, get_element_name(i), &te);
 				cairo_move_to(maincanvas_cs, x, y);
-				cairo_show_text(maincanvas_cs, get_point_name(i, j));
+				cairo_show_text(maincanvas_cs, get_element_name(i));
 			}
 		}
 	}
@@ -111,10 +137,10 @@ static void resizemaincanvas(GtkWidget *widget, GdkRectangle *gdkrect, gpointer 
 	int newmaincanvasWidth;
 	int newmaincanvasHeight;
 
-	#ifdef DEBUGMODE
+	#ifdef DEBUG
 	{
-		printf("DEBUG: Resize Main Canvas.\r\n");
-		printf("DEBUG: Current Width, Height = (%d, %d), New Width, Height = (%d, %d)\r\n", maincanvasWidth, maincanvasHeight, gdkrect->width, gdkrect->height);
+		printf(RED"DEBUG: "NRM"Resize Main Canvas.\r\n");
+		printf(RED"DEBUG: "NRM"Current Width, Height = (%d, %d), New Width, Height = (%d, %d)\r\n", maincanvasWidth, maincanvasHeight, gdkrect->width, gdkrect->height);
 	}
 	#endif
 
@@ -133,10 +159,10 @@ static gboolean maincanvasvscroll(GtkRange *range, GtkScrollType scroll, gdouble
 	double dvalue;
 	dvalue = gtk_adjustment_get_value(GTK_ADJUSTMENT(maincanvasvscrollbaradjustment));
 
-	#ifdef DEBUGMODE
+	#ifdef DEBUG
 	{
-		printf("DEBUG: Vertical Scroll\r\n");
-		printf("DEBUG: Scroll value = %.3f\r\n", value);
+		printf(RED"DEBUG: "NRM"Vertical Scroll\r\n");
+		printf(RED"DEBUG: "NRM"Scroll value = %.3f\r\n", value);
 	}
 	#endif  
 
@@ -156,7 +182,7 @@ static gboolean maincanvashscroll(GtkRange *range, GtkScrollType scroll, gdouble
 	double dvalue;
 	dvalue = gtk_adjustment_get_value(GTK_ADJUSTMENT(maincanvashscrollbaradjustment));
 
-	#ifdef DEBUGMODE
+	#ifdef DEBUG
 	{
 		printf("DEBUG: Horizontal Scroll\r\n");      
 		printf("DEBUG: Scroll value = %.3f\r\n", value);
@@ -173,9 +199,9 @@ static gboolean maincanvashscroll(GtkRange *range, GtkScrollType scroll, gdouble
 
 static void scroll(GtkWidget *widget, GdkEventScroll *eev, gpointer data)
 {
-	#ifdef DEBUGMODE
+	#ifdef DEBUG
 	{
-		printf("DEBUG: Canvas Mouse Scroll\r\n");
+		printf(RED"DEBUG: "NRM"Canvas Mouse Scroll\r\n");
 	}
 	#endif
 
@@ -223,11 +249,11 @@ void setupscrolladjustments()
 static void mousebutton(GtkWidget *widget, GdkEventButton *eev, gpointer data)
 {
 	double x, y;
-	// #ifdef DEBUGMODE
+	#ifdef DEBUG
 	{
-		printf("DEBUG: Mouse Button %d Pressed\r\n", eev->button);
+		printf(RED"DEBUG: "NRM"Mouse Button %d Pressed\r\n", eev->button);
 	}
-	// #endif
+	#endif
 
 	if (eev->button == 1) // Left Mouse Button //
 	{
@@ -236,12 +262,13 @@ static void mousebutton(GtkWidget *widget, GdkEventButton *eev, gpointer data)
 		GdkEventMotion* e=(GdkEventMotion*)eev;
 		printf("Coordinates: (%u,%u)\r\n", (guint)e->x,(guint)e->y);
 
-		if (ratio != 0)
+		// if (ratio != 0)
 		{
+			// x = CANVASWIDTHOFFSET + (get_element_x(i) * ratio)*zoomvalue - maincanvasOx
 			x = ((guint)e->x - CANVASWIDTHOFFSET + maincanvasOx) / (ratio * zoomvalue) ;
 			y = ((guint)e->y - CANVASHEIGHTOFFSET + maincanvasOy) / (ratio * zoomvalue) ;
 			printf("New Coordinates: (%lf,%lf)\r\n", x, y);
-			print_nearest_neighbor(x, y);
+			dump_nearest_neighbor(x, y);
 		}
 	}
 
@@ -259,9 +286,9 @@ static void mousebutton(GtkWidget *widget, GdkEventButton *eev, gpointer data)
 
 static void quitaction()
 {
-	#ifdef DEBUGMODE
+	#ifdef DEBUG
 	{
-		printf("DEBUG: Quit Action\r\n");
+		printf(RED"DEBUG: "NRM"Quit Action\r\n");
 	}
 	#endif
 
@@ -362,13 +389,3 @@ void start_gui()
 	gtk_main();
 
 }
-
-// gint main (gint argc, gchar **argv)
-// {
-// 	// you may call start_gui() from TCL, based on a TCL command //
-// 	// alternatively, you may create a thread, but this is a lot more complex! //
-// 	start_gui();
-
-// 	return EXIT_SUCCESS;
-
-// }

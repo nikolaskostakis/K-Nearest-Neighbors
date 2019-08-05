@@ -34,13 +34,15 @@ void init_tcl(char *argv[])
 	Tcl_CreateObjCommand(interpreter, "cat", cat, NULL, NULL);
 
 	Tcl_CreateObjCommand(interpreter, "read_points", read_points, NULL, NULL);
-	Tcl_CreateObjCommand(interpreter, "print_hash", print_hash, NULL, NULL);
+	Tcl_CreateObjCommand(interpreter, "print_element_array", print_element_array, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "create_kdTree", create_kdTree, NULL, NULL);
+	Tcl_CreateObjCommand(interpreter, "print_kdTree", print_kdTree, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "find_NN", find_NN, NULL, NULL);
-	Tcl_CreateObjCommand(interpreter, "clear_points", clear_points, NULL, NULL);
+	Tcl_CreateObjCommand(interpreter, "clear_elements", clear_elements, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "find_nearest_neighbours", find_nearest_neighbours, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "find_neighbours_within_radius", find_neighbours_within_radius, NULL, NULL);
 	Tcl_CreateObjCommand(interpreter, "print_array", print_array, NULL, NULL);
+	Tcl_CreateObjCommand(interpreter, "read_drawbuffer_output", read_drawbuffer_output, NULL, NULL);
 }
 
 // *** less *** //
@@ -148,8 +150,8 @@ int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *co
 	return TCL_OK;
 }
 
-// *** print_hash *** //
-int print_hash(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
+// *** print_element_array *** //
+int print_element_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "";
 
@@ -159,7 +161,7 @@ int print_hash(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *con
 		return TCL_ERROR;
 	}
 
-	print_point_hash();
+	dump_element_array();
 
 	return TCL_OK;
 }
@@ -176,7 +178,22 @@ int create_kdTree(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *
 	}
 
 	create_KD_tree();
-	print_KD_tree();
+
+	return TCL_OK;
+}
+
+// *** creat_kdTree *** //
+int print_kdTree(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
+{
+	const char syntax[] = "";
+
+	if (argc != 1)
+	{
+		Tcl_WrongNumArgs(interp, 1, argv, syntax);
+		return TCL_ERROR;
+	}
+
+	dump_KD_tree();
 
 	return TCL_OK;
 }
@@ -199,17 +216,17 @@ int find_NN(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const 
 
 	#ifdef DEBUG
 	{
-		print_point_hash_distances(x, y);
+		dump_element_distances(x, y);
 	}
 	#endif
 
-	print_nearest_neighbor(x, y);
+	dump_nearest_neighbor(x, y);
 
 	return TCL_OK;
 }
 
-// *** clear_points *** //
-int clear_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
+// *** clear_elements *** //
+int clear_elements(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "";
 
@@ -219,7 +236,7 @@ int clear_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *c
 		return TCL_ERROR;
 	}
 
-	free_point_hash();
+	free_element_array();
 	free_sorting_array();
 	free_KD_tree();
 
@@ -230,10 +247,92 @@ int clear_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *c
 int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
 {
 	const char syntax[] = "[-k <noof_neighbors> | -r <radius>] -point <x-coord> <y-coord>";
+	char *flag = NULL;
 	unsigned long k = 0;
 	unsigned long r = 0;
 	double x = 0;
 	double y = 0;
+	clock_t start, end;
+
+	if ((argc != 4) && (argc != 6))
+	{
+		Tcl_WrongNumArgs(interp, 1, argv, syntax);
+		return TCL_ERROR;
+	}
+
+	
+	flag = Tcl_GetString(argv[1]);
+	Tcl_GetDouble(interp, Tcl_GetString(argv[4]), &x);
+	Tcl_GetDouble(interp, Tcl_GetString(argv[5]), &y);
+
+	if (strcmp(flag, "-k") == 0)
+	{
+		Tcl_GetLongFromObj(interp, argv[2], (long *)&k);
+
+		if (k <= 0)
+		{
+			return TCL_ERROR;
+		}
+		else if (k == 1)
+		{
+			#ifdef DEBUG
+			{
+				dump_element_distances(x, y);
+			}
+			#endif
+			start = clock();
+			dump_nearest_neighbor(x, y);
+			end = clock();
+			printf("\nTime == "RED"%ld %ld\n\r\t%lf"NRM"\r\n", end, start, (double)(end-start)/CLOCKS_PER_SEC);
+		}
+		else
+		{
+			#ifdef DEBUG
+			{
+				dump_element_distances(x, y);
+			}
+			#endif
+
+			dump_k_nearest_neighbours(x, y, k);
+		}
+	}
+	else if (strcmp(flag, "-r") == 0)
+	{
+		Tcl_GetLongFromObj(interp, argv[2], (long *)&r);
+
+		if (r <= 0)
+		{
+			return TCL_ERROR;
+		}
+		else
+		{
+			#ifdef DEBUG
+			{
+				dump_element_distances(x, y);
+			}
+			#endif
+
+			dump_nearest_neighbours_within_radius(x, y, r);
+		}
+	}
+	else
+	{
+		Tcl_WrongNumArgs(interp, 1, argv, syntax);
+		return TCL_ERROR;
+	}
+	
+
+	return TCL_OK;
+}
+
+// *** find_K_nearest_neighbours *** //
+int find_K_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
+{
+	const char syntax[] = "-k <noof_neighbors> -point <x-coord> <y-coord>";
+	unsigned long k = 0;
+	double x = 0;
+	double y = 0;
+	clock_t start, end;
 
 	if ((argc != 4) && (argc != 6))
 	{
@@ -253,21 +352,23 @@ int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc,
 	{
 		#ifdef DEBUG
 		{
-			print_point_hash_distances(x, y);
+			dump_element_distances(x, y);
 		}
 		#endif
-
-		print_nearest_neighbor(x, y);
+		start = clock();
+		dump_nearest_neighbor(x, y);
+		end = clock();
+		printf("\nTime == "RED"%ld %ld\n\r\t%lf"NRM"\r\n", end, start, (double)(end-start)/CLOCKS_PER_SEC);
 	}
 	else
 	{
 		#ifdef DEBUG
 		{
-			print_point_hash_distances(x, y);
+			dump_element_distances(x, y);
 		}
 		#endif
 
-		print_k_nearest_neighbours(x, y, k);
+		dump_k_nearest_neighbours(x, y, k);
 	}
 
 	return TCL_OK;
@@ -299,11 +400,11 @@ int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int
 	{
 		#ifdef DEBUG
 		{
-			print_point_hash_distances(x, y);
+			dump_element_distances(x, y);
 		}
 		#endif
 
-		print_nearest_neighbours_within_radius(x, y, radius);
+		dump_nearest_neighbours_within_radius(x, y, radius);
 	}
 
 	return TCL_OK;
@@ -320,7 +421,40 @@ int print_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *co
 		return TCL_ERROR;
 	}
 
-	print_sorting_array();
+	dump_sorting_array();
 
+	return TCL_OK;
+}
+
+// *** read_points *** //
+int read_drawbuffer_output(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[])
+{
+	const char syntax[] = "<filepath>";
+
+	int len = 0;
+	FILE *fp = NULL;
+	char *file = NULL;
+
+	if (argc != 2)
+	{
+		Tcl_WrongNumArgs(interp, 1, argv, syntax);
+		return TCL_ERROR;
+	}
+
+	file = Tcl_GetStringFromObj(argv[1], &len);
+
+	fp = fopen(file, "r");
+
+	if (fp == NULL)
+	{
+		printf("File does not exist!\n");
+		return TCL_ERROR;
+	}
+
+	parse_drawbuffer_output_file(fp);
+	fclose(fp);
+
+	printf(GRN"Elements have been parsed and stored!"NRM"\r\n");
+	
 	return TCL_OK;
 }

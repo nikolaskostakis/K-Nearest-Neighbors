@@ -22,11 +22,11 @@ OBJ = build/main.o build/tcl/tcl.o build/readline/readline.o build/ui/ui.o build
 
 knn: EXEC_HEADER := $(GUI_HEADER)
 knn: EXEC_FOOTER := $(GUI_FOOTER) $(MATH) $(TCL) $(READLINE)
-knn: $(OBJ)
+knn: $(OBJ) src/definitions.h
 	$(CC) $(CFLAGS) $(EXEC_HEADER) $^ -o $@ $(EXEC_FOOTER)
 
 debug: CFLAGS += -DDEBUG
-debug: knn
+debug: new
 
 build/main.o: CFLAGS += -c
 build/main.o: src/main.c src/main.h

@@ -9,11 +9,13 @@
 #include <string.h>
 #include <limits.h>
 
+#include "../definitions.h"
+
 #ifndef UI
 #define UI
 
-#define ZOOMSTEP      0.1
-#define BOUNDZOOMIN   2
+#define ZOOMSTEP      0.2
+#define BOUNDZOOMIN   10
 #define BOUNDZOOMOUT  0.1
 
 #define CANVASOFFSET        25
@@ -65,10 +67,10 @@ void draw_point(double x, double y);
 
 // External Variables //
 
-// From structures //
+// From structs //
 extern double pointMaxXCoordinate;
 extern double pointMaxYCoordinate;
-extern unsigned long pointHTSize;
+extern unsigned long elementArraySize;
 
 // External Functions //
 
@@ -77,6 +79,12 @@ extern int get_point_hash_depth(unsigned long hash);
 extern double get_point_x_coord(unsigned long hash, int depth);
 extern double get_point_y_coord(unsigned long hash, int depth);
 extern char *get_point_name(unsigned long hash, int depth);
-extern void print_nearest_neighbor(double x, double y);
+extern void dump_nearest_neighbor(double x, double y);
+extern char *get_element_name(unsigned long index);
+extern double get_element_x(unsigned long index);
+extern double get_element_y(unsigned long index);
+extern double get_element_width(unsigned long index);
+extern double get_element_height(unsigned long index);
+extern int get_element_type(unsigned long index);
 
 #endif

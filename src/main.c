@@ -44,13 +44,18 @@ int main (int argc, char *argv[]){
 			}
 			free(hist_text);
 			// Text is not freed, if I try to free it, it crashes.
-			free(text);
+			rl_free(text);
 
 			if (!strcmp(command, "quit"))
 			{
 				clear_history();
 				Tcl_DeleteInterp(interpreter);
 				exit(0);
+			}
+			else if (!strcmp(command, "exit"))
+			{
+				clear_history();
+				Tcl_Eval(interpreter, "exit");
 			}
 			// Personal history, not the Tcl Command
 			else if (!strcmp(command, "history"))

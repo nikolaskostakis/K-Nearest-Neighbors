@@ -29,7 +29,8 @@ char *commands[] = {
 	"less", "cat",
 
 	// Custom commands //
-	"start_gui", "read_points", "print_hash", "create_kdTree", "find_NN", "clear_points", "find_nearest_neighbours",
+	"start_gui", "read_points", "print_element_array", "create_kdTree", "print_kdTree", "find_NN",
+	"clear_elements", "find_nearest_neighbours", "find_K_nearest_neighbours", "find_neighbours_within_radius",
 	"print_array",
 
 	NULL
