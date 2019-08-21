@@ -11,9 +11,6 @@
 
 #include "../definitions.h"
 
-#ifndef UI
-#define UI
-
 #define ZOOMSTEP      0.2
 #define BOUNDZOOMIN   10
 #define BOUNDZOOMOUT  0.1
@@ -86,5 +83,3 @@ extern double get_element_y(unsigned long index);
 extern double get_element_width(unsigned long index);
 extern double get_element_height(unsigned long index);
 extern int get_element_type(unsigned long index);
-
-#endif

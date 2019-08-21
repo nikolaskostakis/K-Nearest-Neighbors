@@ -1,6 +1,3 @@
-#ifndef TCL
-#define TCL
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,7 +20,7 @@ int clear_elements(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj 
 int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 int find_K_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int print_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
+int print_sorting_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 int read_drawbuffer_output(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
 
 // External Functions //
@@ -48,6 +45,3 @@ extern void dump_nearest_neighbours_within_radius(double x, double y, double ran
 extern void dump_k_nearest_neighbours(double x, double y, unsigned long k);
 
 extern void dump_element_distances(double x, double y);
-
-
-#endif

@@ -10,12 +10,12 @@ READLINE = -lreadline
 # Headers #
 EXEC_HEADER =
 HEADER =
-GUI_HEADER = `pkg-config --cflags gtk+-2.0` `pkg-config --cflags gthread-2.0`
+GUI_HEADER = `pkg-config --cflags gtk+-2.0` 
 
 # Footers #
 EXEC_FOOTER =
 FOOTER =
-GUI_FOOTER = `pkg-config --libs gtk+-2.0` `pkg-config --libs gthread-2.0`
+GUI_FOOTER = `pkg-config --libs gtk+-2.0`
 
 # Objects #
 OBJ = build/main.o build/tcl/tcl.o build/readline/readline.o build/ui/ui.o build/io/io.o build/structs/structs.o
@@ -64,7 +64,7 @@ build/structs/structs.o: src/structs/structs.c src/structs/structs.h
 
 clean_objects:
 	@ rm -f $(OBJ)
-	@ rm -rf build/ build/tcl/ build/readline/ build/ui/ build/io/ build/structs/
+	@ rm -rf build/*/
 	rm -rf build/
 
 clean: clean_objects

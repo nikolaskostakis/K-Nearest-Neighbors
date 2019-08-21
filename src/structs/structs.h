@@ -1,13 +1,9 @@
-#ifndef STRUCTURES
-#define STRUCTURES
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
-// #include "prime_numbers.h"
 #include "../definitions.h"
 
 // Definitions //
@@ -82,5 +78,3 @@ void dump_nearest_neighbours_within_radius(double x, double y, double range);
 
 unsigned long *find_k_nearest_neighbours(unsigned long index, double x, double y, unsigned long n, unsigned long *noofNeighbors);
 void dump_k_nearest_neighbours(double x, double y, unsigned long k);
-
-#endif

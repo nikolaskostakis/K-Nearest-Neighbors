@@ -37,7 +37,7 @@ static void expose(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 	{
 		printf(RED"DEBUG: "NRM"Canvas Expose\r\n");
 	}
-	#endif  
+	#endif
 
 	maincanvaspaint(widget, event, data);
 }
@@ -89,7 +89,22 @@ void draw_shapes()
 			w = get_element_width(i) * ratio * zoomvalue;
 			h = get_element_height(i) * ratio * zoomvalue;
 
-			if (get_element_type(i) == 0)
+			// Points //
+			if (get_element_type(i) == -1)
+			{
+				cairo_arc(maincanvas_cs, x, y, (POINT_DIAMETER * zoomvalue), 0, 2 * M_PI);
+				cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
+				cairo_fill(maincanvas_cs);
+
+				cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
+				cairo_select_font_face(maincanvas_cs, "Georgia", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+				cairo_set_font_size(maincanvas_cs, 0.3 * ratio * zoomvalue);
+				cairo_text_extents(maincanvas_cs, get_element_name(i), &te);
+				cairo_move_to(maincanvas_cs, x, y);
+				cairo_show_text(maincanvas_cs, get_element_name(i));
+			}
+			// Cells //
+			else if (get_element_type(i) == 0)
 			{
 				cairo_set_source_rgb(maincanvas_cs, 0, 1, 0);
 				cairo_rectangle(maincanvas_cs, x, y, w, h);
@@ -102,30 +117,34 @@ void draw_shapes()
 				cairo_move_to(maincanvas_cs, x + w/2, y + h/2);
 				cairo_show_text(maincanvas_cs, get_element_name(i));
 			}
+			// IOs //
 			else if (get_element_type(i) == 1)
 			{
 				cairo_set_source_rgb(maincanvas_cs, 1, 0, 1);
 				cairo_rectangle(maincanvas_cs, x, y, w, h);
 				cairo_stroke(maincanvas_cs);
 			}
+			// Modules //
 			else if (get_element_type(i) == 2)
 			{
 				cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
 				cairo_rectangle(maincanvas_cs, x, y, w, h);
 				cairo_stroke(maincanvas_cs);
 			}
-			else
+			else 
 			{
-				cairo_arc(maincanvas_cs, x, y, (POINT_DIAMETER * zoomvalue), 0, 2 * M_PI);
-				cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
-				cairo_fill(maincanvas_cs);
+				// Do nothing - Temporary Measurement //
 
-				cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
-				cairo_select_font_face(maincanvas_cs, "Georgia", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-				cairo_set_font_size(maincanvas_cs, 0.3 * ratio * zoomvalue);
-				cairo_text_extents(maincanvas_cs, get_element_name(i), &te);
-				cairo_move_to(maincanvas_cs, x, y);
-				cairo_show_text(maincanvas_cs, get_element_name(i));
+				// cairo_arc(maincanvas_cs, x, y, (POINT_DIAMETER * zoomvalue), 0, 2 * M_PI);
+				// cairo_set_source_rgb(maincanvas_cs, 1, 0, 0);
+				// cairo_fill(maincanvas_cs);
+
+				// cairo_set_source_rgb(maincanvas_cs, 1, 1, 1);
+				// cairo_select_font_face(maincanvas_cs, "Georgia", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+				// cairo_set_font_size(maincanvas_cs, 0.3 * ratio * zoomvalue);
+				// cairo_text_extents(maincanvas_cs, get_element_name(i), &te);
+				// cairo_move_to(maincanvas_cs, x, y);
+				// cairo_show_text(maincanvas_cs, get_element_name(i));
 			}
 		}
 	}

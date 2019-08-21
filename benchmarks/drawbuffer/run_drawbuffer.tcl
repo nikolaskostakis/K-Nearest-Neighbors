@@ -1,5 +1,6 @@
 # cat benchmarks/drawbuffer/drawbuffer_1.txt
 read_drawbuffer_output benchmarks/drawbuffer/drawbuffer_1.txt
+# read_drawbuffer_output benchmarks/drawbuffer/drawbuffer_2.txt
 # print_element_array
 create_kdTree
 # print_array

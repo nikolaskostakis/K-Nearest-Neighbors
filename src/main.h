@@ -1,6 +1,3 @@
-#ifndef MAIN
-#define MAIN
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -27,5 +24,3 @@ extern void init_readline();
 
 // From ui //
 extern void start_gui();
-
-#endif
