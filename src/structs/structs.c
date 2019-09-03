@@ -1,26 +1,26 @@
 #include "structs.h"
-#include "prime_numbers.h"
 
-// Max coordinates of points //
-double pointMaxXCoordinate = -1;
-double pointMaxYCoordinate = -1;
+void initialise_globals()
+{
+  // Initialize the max coordinates //
+  elementmaxxcoordinate = -1;
+  elementmaxycoordinate = -1;
 
-// KD-Tree //
-struct kdTreeNode *kdTree = NULL;
-unsigned long kdTreeArraySize = 0;
+  // Initialize the KD-Tree //
+  kdtree = NULL;
+  kdtreearraysize = 0;
 
-// Pointer Array for KD-Tree //
-unsigned long *sortingArray = NULL;
-unsigned long sortingArraySize = 0;
+  // Initialize the Sorting Array //
+  sortingarray = NULL;
+  sortingarraysize = 0;
 
-// Elements' Array //
-struct knnElement *elementArray = NULL;
-unsigned long elementArraySize = 0;
-unsigned long elementArrayIndex = 0;
+  // Initialize the Elements' Array //
+  elementarray = NULL;
+  elementarraysize = 0;
 
-// Temporary Globals for coordinates //
-// They are used for sorting using qsort() //
-double tempX, tempY;
+  // Initialize the index to the Elements' Array //
+  elementarrayindex = 0;
+}
 
 // *** euclidean_distance *** //
 // Find the Euclidean distance between two points //
@@ -40,26 +40,34 @@ int point_x_comparator(const void *p1, const void *p2)
   double x1, x2;
 
   // Take the representative x coordinate for the first element //
-  if (elementArray[index1].type == point)
+  // If the element is a point //
+  if ((elementarray + index1)->type == point)
     {
-      x1 = elementArray[index1].x;
+      // Then its coordinate is the one given from the field x //
+      x1 = (elementarray + index1)->x;
     }
+  // If the element is not a point //
   else
     {
-      x1 = elementArray[index1].x + elementArray[index1].width/2;
+      // Then the coordinate used is the one from its center, since the x field is the coordinate of the top left corner //
+      x1 = (elementarray + index1)->x + ((elementarray + index1)->width / 2);
     }
 
   // Take the representative x coordinate for the second element //
-  if (elementArray[index2].type == point)
+  // If the element is a point //
+  if ((elementarray + index2)->type == point)
     {
-      x2 = elementArray[index2].x;
+      // Then its coordinate is the one given from the field x //
+      x2 = (elementarray + index2)->x;
     }
+  // If the element is not a point //
   else
     {
-      x2 = elementArray[index2].x + elementArray[index2].width/2;
+      // Then the coordinate used is the one from its center, since the x field is the coordinate of the top left corner //
+      x2 = (elementarray + index2)->x + ((elementarray + index2)->width / 2);
     }
 
-  // Check if the first point's coordinate is after the second's //
+  // Check if the first element's coordinate is after the second's //
   if (isgreater(x1, x2) == 1)
     {
       return 1;
@@ -87,26 +95,34 @@ int point_y_comparator(const void *p1, const void *p2)
   double y1, y2;
 
   // Take the representative y coordinate for the first element //
-  if (elementArray[index1].type == point)
+  // If the element is a point //
+  if ((elementarray + index1)->type == point)
     {
-      y1 = elementArray[index1].y;
+      // Then its coordinate is the one given from the field y //
+      y1 = (elementarray + index1)->y;
     }
+  // If the element is not a point //
   else
     {
-      y1 = elementArray[index1].y + elementArray[index1].height/2;
+      // Then the coordinate used is the one from its center, since the y field is the coordinates of the top left corner //
+      y1 = (elementarray + index1)->y + ((elementarray + index1)->height / 2);
     }
 
   // Take the representative y coordinate for the second element //
-  if (elementArray[index2].type == point)
+  // If the element is a point //
+  if ((elementarray + index2)->type == point)
     {
-      y2 = elementArray[index2].y;
+      // Then its coordinate is the one given from the field y //
+      y2 = (elementarray + index2)->y;
     }
+  // If the element is not a point //
   else
     {
-      y2 = elementArray[index2].y + elementArray[index2].height/2;
+      // Then the coordinate used is the one from its center, since the y field is the coordinate of the top left corner //
+      y2 = (elementarray + index2)->y + ((elementarray + index2)->height / 2);
     }
 
-  // Check if the first point's coordinate is after the second's //
+  // Check if the first element's coordinate is after the second's //
   if (isgreater(y1, y2) == 1)
     {
       return 1;
@@ -129,115 +145,145 @@ int point_y_comparator(const void *p1, const void *p2)
 // given point and decise their positions accordingly  //
 int distance_comparator(const void *p1, const void *p2)
 {
-  unsigned long index1 = sortingArray[*(unsigned long *)p1];
-  unsigned long index2 = sortingArray[*(unsigned long *)p2];
-  double distance1;
-  double distance2;
+  unsigned long index1 = *(sortingarray + *(unsigned long *)p1);
+  unsigned long index2 = *(sortingarray + *(unsigned long *)p2);
+  double distance1, distance2;
+  double tempelementx, tempelementy;
 
-  if (elementArray[index1].type == point)
-  {
-    distance1 = euclidean_distance(tempX, tempY, elementArray[index1].x, elementArray[index1].y);
-  }
+  // Take the distance from the first element //
+  // If the element is a point //
+  if (elementarray[index1].type == point)
+    {
+      // Then its coordinates are the ones given from the fields x, y //
+      tempelementx = (elementarray + index1)->x + ((elementarray + index1)->width / 2);
+      tempelementy = (elementarray + index1)->y + ((elementarray + index1)->height / 2);
+    }
+  // If the element is not a point //
   else
-  {
-    distance1 = euclidean_distance(tempX, tempY, elementArray[index1].x + elementArray[index1].width/2, elementArray[index1].y + elementArray[index1].height/2);
-  }
+    {
+      // Then the coordinates used are the ones from its center, since the x, y fields are the coordinates of the top left corner //
+      tempelementx = (elementarray + index1)->x;
+      tempelementy = (elementarray + index1)->y;
+    }
+  distance1 = euclidean_distance(refpointx, refpointy, tempelementx, tempelementy);
 
-  if (elementArray[index2].type == point)
-  {
-    distance2 = euclidean_distance(tempX, tempY, elementArray[index2].x, elementArray[index2].y);
-  }
+  // Take the distance from the second element //
+  // If the element is a point //
+  if (elementarray[index2].type == point)
+    {
+      // Then its coordinates are the ones given from the fields x, y //
+      tempelementx = (elementarray + index2)->x;
+      tempelementy = (elementarray + index2)->y;
+    }
+  // If the element is not a point //
   else
-  {
-    distance2 = euclidean_distance(tempX, tempY, elementArray[index2].x + elementArray[index2].width/2, elementArray[index2].y + elementArray[index2].height/2);
-  }
-  // Check if the distance of the first point is greater than the second's //
+    {
+      // Then the coordinates used are the ones from its center, since the x, y fields are the coordinates of the top left corner //
+      tempelementx = (elementarray + index2)->x + ((elementarray + index2)->width / 2);
+      tempelementy = (elementarray + index2)->y + ((elementarray + index2)->height / 2);
+    }
+  distance2 = euclidean_distance(refpointx, refpointy, tempelementx, tempelementy);
+
+  // Check if the distance of the first element is greater than the second's //
   if (isgreater(distance1, distance2) == 1)
-  {
-    return 1;
-  }
-  // If not check if the distance of the second point's distance is greater //
+    {
+      return 1;
+    }
+  // If not check if the distance of the second element's distance is greater //
   else if (isless(distance1, distance2) == 1)
-  {
-    return -1;
-  }
+    {
+      return -1;
+    }
   // If not either, then they have the same distance //
   else
-  {
-    return 0;
-  }
+    {
+      return 0;
+    }
 }
 
 // *** init_element_array *** //
 // Initialize the Element Array //
 void init_element_array(unsigned long size)
 {
-  if (elementArray != NULL)
+  // If the Elements Array is not empty //
+  if (elementarray != NULL)
   {
+    // Free it //
+    free_element_array();
   }
 
-  elementArray = (struct knnElement *) calloc(size, sizeof(struct knnElement));
-  assert(elementArray != NULL);
+  // Initialize the array //
+  elementarray = (struct knnelement *) calloc(size, sizeof(struct knnelement));
+  assert(elementarray != NULL);
 
-  elementArraySize = size;
+  elementarraysize = size;
 
-  elementArrayIndex = 0;
+  elementarrayindex = 0;
 }
 
 // *** insert_element *** //
 // Insert an element into the Element Array //
 void insert_element(char *name, double x, double y, int type, double width, double height)
 {
-  elementArray[elementArrayIndex].name = name;
-  elementArray[elementArrayIndex].x = x;
-  elementArray[elementArrayIndex].y = y;
+  // Add the name and coordinates to the new element //
+  (elementarray + elementarrayindex)->name = name;
+  (elementarray + elementarrayindex)->x = x;
+  (elementarray + elementarrayindex)->y = y;
 
+  // Check the type for the new element and assign a corresponding type from those used //
   if (type == -1)
   {
-    elementArray[elementArrayIndex].type = point;
+    (elementarray + elementarrayindex)->type = point;
   }
   else if (type == 0)
   {
-    elementArray[elementArrayIndex].type = cell;
+    (elementarray + elementarrayindex)->type = cell;
   }
   else if (type == 1)
   {
-    elementArray[elementArrayIndex].type = IO;
+    (elementarray + elementarrayindex)->type = IO;
   }
   else if (type == 4)
   {
-    elementArray[elementArrayIndex].type = module;
+    (elementarray + elementarrayindex)->type = module;
   }
   else
   {
-    elementArray[elementArrayIndex].type = other;
+    (elementarray + elementarrayindex)->type = other;
   }
 
-  elementArray[elementArrayIndex].width = width;
-  elementArray[elementArrayIndex].height = height;
+  // Add the width and hwight of the new element //
+  (elementarray + elementarrayindex)->width = width;
+  (elementarray + elementarrayindex)->height = height;
 
-  elementArrayIndex++;
+  // Increase the index for the Elements' Array //
+  elementarrayindex++;
 }
 
-// *** insert_point *** //
-// Insert a point into the Element Array //
-void insert_point(char *name, double x, double y)
-{
-  insert_element(name, x, y, -1, 0, 0);
-}
-
+// *** void free_element_array *** //
+// Free the element array and reset its variables //
 void free_element_array()
 {
   unsigned long i;
 
-  for (i = 0; i < elementArraySize; i++)
-  {
-    free(elementArray[i].name);
-  }
+  // If the Array is empty //
+  if (elementarraysize == 0)
+    {
+      // Do nothing //
+      return;
+    }
 
-  free(elementArray);
-  elementArraySize = 0;
-  elementArrayIndex = 0;
+  // For each element of the array free its name //
+  for (i = 0; i < elementarraysize; i++)
+    {
+      free((elementarray + i)->name);
+    }
+
+  free(elementarray);
+
+  elementarray = NULL;
+  elementarraysize = 0;
+  elementarrayindex = 0;
 }
 
 // *** dump_point_hash *** //
@@ -246,8 +292,8 @@ void dump_element_array()
 {
   unsigned long i;
 
-  // If the Hash Table is empty //
-  if (elementArraySize == 0)
+  // If the Array is empty //
+  if (elementarraysize == 0)
     {
       // Print a correspoinding message //
       printf(YEL"Element Array is empty!\r\n"NRM);
@@ -255,27 +301,27 @@ void dump_element_array()
     }
 
   // For each element of the Array //
-  for (i = 0; i < elementArraySize; i++)
+  for (i = 0; i < elementarraysize; i++)
     {
       printf(BLU"Element:\r\n"NRM);
 
-      printf(MAG"\tName:     "NRM"%s\r\n", elementArray[i].name);
-      printf(MAG"\tCoords: ("NRM"%.4lf"MAG","NRM"%.4lf"MAG")\r\n"NRM, elementArray[i].x, elementArray[i].y);
+      printf(MAG"\tName:     "NRM"%s\r\n", (elementarray + i)->name);
+      printf(MAG"\tCoords: ("NRM"%.4lf"MAG","NRM"%.4lf"MAG")\r\n"NRM, (elementarray + i)->x, (elementarray + i)->y);
       printf(MAG"\tType:     "NRM);
 
-      if (elementArray[i].type == point)
+      if ((elementarray + i)->type == point)
         {
           printf("Point\r\n");
         }
-      else if (elementArray[i].type == cell)
+      else if ((elementarray + i)->type == cell)
       {
         printf("Cell\r\n");
       }
-      else if (elementArray[i].type == IO)
+      else if ((elementarray + i)->type == IO)
         {
           printf("IO\r\n");
         }
-      else if (elementArray[i].type == module)
+      else if ((elementarray + i)->type == module)
         {
           printf("Module\r\n");
         }
@@ -286,114 +332,144 @@ void dump_element_array()
     }
 }
 
+// *** void dump_element_distances *** //
+// Print the distances of the elements //
+// of the Array from the given point   //
+// The function is used for debugging  //
 void dump_element_distances(double x, double y)
 {
   unsigned long i;
   double distance;
-
-  // If the Hash Table is empty //
-  if (elementArraySize == 0)
-    {
-      // Print a cooresponding message //
-      printf(YEL"Element Array is empty!\r\n"NRM);
-      return;
-    }
+  double tempelementx, tempelementy;
 
   // For each element of the array //
-  for (i = 0; i < elementArraySize; i++)
+  for (i = 0; i < elementarraysize; i++)
     {
       // Find its distance to the given point and print it //
-      if (elementArray[i].type == point)
+      if ((elementarray + i)->type == point)
         {
-          distance = euclidean_distance(x, y, elementArray[i].x, elementArray[i].y);
+          tempelementx = (elementarray + i)->x;
+          tempelementy = (elementarray + i)->y;
         }
       else
         {
-          distance = euclidean_distance(x, y, elementArray[i].x + elementArray[i].width/2, elementArray[i].y + elementArray[i].height/2);
+          tempelementx = (elementarray + i)->x + ((elementarray + i)->width / 2);
+          tempelementy = (elementarray + i)->y + ((elementarray + i)->height / 2);
         }
-      printf(RED"DEBUG: "NRM"Distance from %s: %lf\r\n", elementArray[i].name, distance);
+      distance = euclidean_distance(x, y, tempelementx, tempelementy);
+      
+      printf(RED"DEBUG: "NRM"Distance from %s: %lf\r\n", (elementarray + i)->name, distance);
     }
 }
 
-char *get_element_name(unsigned long index)
+// *** get_element_name *** //
+// Return the name of the given element       //
+// This function is used primarily to avoid   //
+// exporting the element array to other files //
+inline char *get_element_name(unsigned long index)
 {
-  return elementArray[index].name;
+  return (elementarray + index)->name;
 }
 
-double get_element_x(unsigned long index)
+// *** get_element_x *** //
+// Return the x coordinate of the given element //
+// This function is used primarily to avoid     //
+// exporting the element array to other files   //
+inline double get_element_x(unsigned long index)
 {
-  return elementArray[index].x;
+  return (elementarray + index)->x;
 }
 
-double get_element_y(unsigned long index)
+// *** get_element_y *** //
+// Return the y coordinate of the given element //
+// This function is used primarily to avoid     //
+// exporting the element array to other files   //
+inline double get_element_y(unsigned long index)
 {
-  return elementArray[index].y;
+  return (elementarray + index)->y;
 }
 
-double get_element_width(unsigned long index)
+// *** get_element_width *** //
+// Return the width of the given element      //
+// This function is used primarily to avoid   //
+// exporting the element array to other files //
+inline double get_element_width(unsigned long index)
 {
-  return elementArray[index].width;
+  return (elementarray + index)->width;
 }
 
-double get_element_height(unsigned long index)
+// *** get_element_height *** //
+// Return the height of the given element     //
+// This function is used primarily to avoid   //
+// exporting the element array to other files //
+inline double get_element_height(unsigned long index)
 {
-  return elementArray[index].height;
+  return (elementarray + index)->height;
 }
 
+// *** get_element_type *** //
+// Return the type of the given element       //
+// This function is used primarily to avoid   //
+// exporting the element array to other files //
 int get_element_type(unsigned long index)
 {
-  return elementArray[index].type;
+  return (elementarray + index)->type;
 }
 
-// Sorting Array for KD Tree //
-
 // *** create_sorting_array *** //
-// Create a sorting array that points into the Points   //
-// hash table. It is used to be sorted for the KD tree. //
+// Create an array that "points" into elements of the Elements' Array. This array    //
+// is used by the KD tree, sorting it partially or fully depending on the axis used. //
 void create_sorting_array()
 {
   unsigned long i, j;
 
-  // First Pass - Find the size of the array by adding the number of points in each bucket//
-  for (i = 0; i < elementArraySize; i++)
+  // First Pass - Find the size of the array by finding the //
+  // element that are going to be used by the NN Algoriths  //
+  for (i = 0; i < elementarraysize; i++)
     {
-      if (elementArray[i].type != other)
+      // In this stage of development, all elements described by // 
+      // the type "other" are excluded from the NN Algorithms    //
+      if ((elementarray + i)->type != other)
         {
-          sortingArraySize++;
+          sortingarraysize++;
         }
     }
 
   // Allocate memory for the array //
-  sortingArray = (unsigned long *) calloc(sortingArraySize, sizeof(unsigned long));
-  assert(sortingArray != NULL);
+  sortingarray = (unsigned long *) calloc(sortingarraysize, sizeof(unsigned long));
+  assert(sortingarray != NULL);
 
   // Second Pass - Fill the array //
-  // For each bucket of the Hash Table //
-  for (i = 0, j = 0; i < elementArraySize; i++)
+  // Run through the Elements' Array //
+  for (i = 0, j = 0; i < elementarraysize; i++)
     {
-      if (elementArray[i].type != other)
+      // If an element is of the types allowed by the  //
+      // NN Algorithms, insert it to the Sorting Array //
+      if ((elementarray + i)->type != other)
         {
-          sortingArray[j] = i;
+          *(sortingarray + j) = i;
           j++;
         }
     }
 }
 
 // *** free_sorting_array *** //
-// Free the sorting array //
+// Free the sorting array and reset its variables //
 void free_sorting_array()
 {
-  // If the array is empty //
-  if (sortingArray == NULL)
+  // If the Array is empty //
+  if (sortingarray == NULL)
     {
       // Do nothing //
       return;
     }
 
   // Free the array //
-  free(sortingArray);
-  sortingArray = NULL;
-  sortingArraySize = 0;
+  free(sortingarray);
+
+  // Reset its variables //
+  sortingarray = NULL;
+  sortingarraysize = 0;
 }
 
 // *** dump_sorting_array *** //
@@ -401,22 +477,28 @@ void free_sorting_array()
 void dump_sorting_array()
 {
   unsigned long i;
+  unsigned long sortingarrayindex;
 
   // For each point referred into the array //
-  for (i = 0; i < sortingArraySize; i++)
+  for (i = 0; i < sortingarraysize; i++)
     {
       // Print its name and coordinates //
-      printf(BLU"Point: "NRM"%s\r\n", elementArray[sortingArray[i]].name);
-      printf(MAG"\t("NRM"%.2lf"MAG","NRM"%.2lf"MAG")\r\n"NRM, elementArray[sortingArray[i]].x, elementArray[sortingArray[i]].y);
+      sortingarrayindex = *(sortingarray + i);
+      printf(BLU"Point: "NRM"%s\r\n", (elementarray + sortingarrayindex)->name);
+      printf(MAG"\t("NRM"%.2lf"MAG","NRM"%.2lf"MAG")\r\n"NRM, (elementarray + sortingarrayindex)->x, (elementarray + sortingarrayindex)->y);
     }
 }
 
-// KD Tree Funcions //
-
 // *** create_KD_tree *** //
+// Cretes a KD Tree that will be used for the NN Algorithms.     //
+// Create the Sorting Array that is used for the KD Tree. Then   //
+// create the root node of the KD Tree. If the sorting array     //
+// exceeds the maximum given size, sort the Sorting Array to its //
+// predetermined axis, double the Tree's size and create two     //
+// new nodes, each one having to use half of the Sorting Array.  //
 void create_KD_tree()
 {
-  unsigned long noofElements = 0;
+  unsigned long noofelements = 0;
   unsigned long split = 0;
 
   // Free the existing tree //
@@ -427,118 +509,119 @@ void create_KD_tree()
   create_sorting_array();
 
   // Create the tree //
-  // The first element of the array will remain empty and is allocated for easier traversal //
-  kdTree = (struct kdTreeNode *) calloc(2, sizeof(struct kdTreeNode));
-  assert(kdTree != NULL);
-  kdTreeArraySize = 2;
+  // The first element of the array will remain empty and is  not used for easier traversal //
+  kdtree = (struct kdtreenode *) calloc(2, sizeof(struct kdtreenode));
+  assert(kdtree != NULL);
+  kdtreearraysize = 2;
 
-  // kdTree->isLeaf = false;
-  kdTree[1].axis = X_AXIS; // Chose the x axis as the first one to check //
-  kdTree[1].startIndex = 0;
-  kdTree[1].endIndex = sortingArraySize - 1;
+  // Initialise the fields of the root //
+  (kdtree + 1)->axis = X_AXIS; // Chose the x axis as the first one to check //
+  (kdtree + 1)->startindex = 0;
+  (kdtree + 1)->endindex = sortingarraysize - 1;
 
   // If the elements in the sorting array are more than the defined max //
-  noofElements = kdTree[1].endIndex - kdTree[1].startIndex + 1;
-  if (noofElements > MAX_KDLEAF_ELEMENTS)
+  noofelements = (kdtree + 1)->endindex - (kdtree + 1)->startindex + 1;
+  if (noofelements > MAX_KDLEAF_ELEMENTS)
     {
       // Mark the node as a non leaf one //
-      kdTree[1].isLeaf = 0;
+      (kdtree + 1)->isleaf = 0;
 
       // Sort the array based on the x coordinate //
-      qsort((void *)sortingArray, sortingArraySize, sizeof(struct pointHashElement *), point_x_comparator);
+      qsort((void *)sortingarray, sortingarraysize, sizeof(struct pointHashElement *), point_x_comparator);
     
       // Save the split //
-      split = (sortingArraySize - 1) / 2;
-      kdTree[1].splitIndex = sortingArray[split];
+      split = (sortingarraysize - 1) / 2;
+      (kdtree + 1)->splitindex = *(sortingarray + split);
 
       // Increase the tree size //
-      kdTree = (struct kdTreeNode *) realloc(kdTree, ((2 * kdTreeArraySize) * sizeof(struct kdTreeNode)));;
-      assert(kdTree != NULL);
-      kdTreeArraySize *= 2; // The array that correspondes to the tree has to be doubled in size //
+      kdtree = (struct kdtreenode *) realloc(kdtree, ((2 * kdtreearraysize) * sizeof(struct kdtreenode)));;
+      assert(kdtree != NULL);
+      kdtreearraysize *= 2; // The array that correspondes to the tree has to be doubled in size //
 
       // Fill the children nodes //
-      // Left Child
-      insert_KD_tree_node(2, kdTree[1].startIndex, split);
-      // Right Child
-      insert_KD_tree_node(3, (split + 1), kdTree[1].endIndex);
+      // Create a sub tree for the left child //
+      insert_KD_tree_node(2, (kdtree + 1)->startindex, split);
+      // Create a sub tree for the right child //
+      insert_KD_tree_node(3, (split + 1), (kdtree + 1)->endindex);
     }
-  // If they are not //
+  // If he elements in the sorting array are less than or equal the max value //
   else
     {
-      // Mark the node as a leaf one //
-      kdTree[1].isLeaf = 1;
+      // Mark the root node as a leaf one //
+      (kdtree + 1)->isleaf = 1;
     }
-
-  // kdTree->left = insert_KD_tree_node(kdTree, kdTree->startIndex, split);
-  // kdTree->right = insert_KD_tree_node(kdTree, (split + 1), kdTree->endIndex);
 }
 
 // *** insert_KD_tree_node *** //
-void insert_KD_tree_node(unsigned long index, unsigned long startIndex, unsigned long endIndex)
+// Insert a new node to the KD tree. This node checks the given subarray if it //
+// exceeds the maximum number of elements. If it does, the subarray sorted in  //
+// the different of its parent axis, then it is split and the node calls two   //
+// new nodes, each one handling a half of the subarray. If the subarray does   //
+// not exceed the max value, then the node is characterised as a leaf one.     //
+void insert_KD_tree_node(unsigned long index, unsigned long startindex, unsigned long endindex)
 {
-  unsigned long noofElements = 0;
+  unsigned long noofelements = 0;
   unsigned long split = 0;
   unsigned long parent = 0;
 
   // Fill the new node //
-  kdTree[index].startIndex = startIndex;
-  kdTree[index].endIndex = endIndex;
+  (kdtree + index)->startindex = startindex;
+  (kdtree + index)->endindex = endindex;
 
   // Find the number of elements that correspond to this node //
-  noofElements = endIndex - startIndex + 1;
+  noofelements = endindex - startindex + 1;
 
   // If the node has more elements than the defined max //
-  if (noofElements > MAX_KDLEAF_ELEMENTS)
+  if (noofelements > MAX_KDLEAF_ELEMENTS)
     {
       // Mark the node as a non leaf one //
-      kdTree[index].isLeaf = 0;
+      (kdtree + index)->isleaf = 0;
       
       // Define the axis as the one not used by the parent //
       parent = index / 2;
-      if (kdTree[parent].axis == X_AXIS)
+      if (kdtree[parent].axis == X_AXIS)
         {
-          kdTree[index].axis = Y_AXIS;
+          (kdtree + index)->axis = Y_AXIS;
         }
       else
         {
-          kdTree[index].axis = X_AXIS;
+          (kdtree + index)->axis = X_AXIS;
         }
 
       // Sort the sub-array depending on the axis //
-      if (kdTree[index].axis == Y_AXIS)
+      if ((kdtree + index)->axis == Y_AXIS)
         {
-          qsort((void *)&sortingArray[startIndex], noofElements, sizeof(struct pointHashElement *), point_x_comparator);
+          qsort((void *)&sortingarray[startindex], noofelements, sizeof(struct pointHashElement *), point_x_comparator);
         }
       else
         {
-          qsort((void *)&sortingArray[startIndex], noofElements, sizeof(struct pointHashElement *), point_y_comparator);
+          qsort((void *)&sortingarray[startindex], noofelements, sizeof(struct pointHashElement *), point_y_comparator);
         }
 
-      // Check if the tree has enough space for the new nodes //
-      // If the index of the left new node is greater or //
-      // equal to the size of the tree, double its size  //
-      if ((2 * index) >= kdTreeArraySize)
+      // Check if the tree has enough space for the new nodes. If the index of the left //
+      // new node is greater or equal to the size of the tree, double the tree size.    //
+      if ((2 * index) >= kdtreearraysize)
         {
-          kdTree = (struct kdTreeNode *) realloc(kdTree, ((2 * kdTreeArraySize) * sizeof(struct kdTreeNode)));
-          assert(kdTree != NULL);
-          kdTreeArraySize *= 2;
+          kdtree = (struct kdtreenode *) realloc(kdtree, ((2 * kdtreearraysize) * sizeof(struct kdtreenode)));
+          assert(kdtree != NULL);
+          kdtreearraysize *= 2;
         }
 
       // Find the index of the split //
-      split = startIndex + ((endIndex - startIndex) / 2);
+      split = startindex + ((endindex - startindex) / 2);
 
       // Save the split //
-      kdTree[index].splitIndex = sortingArray[split];
+      (kdtree + index)->splitindex = *(sortingarray + split);
 
-      // Left Child
-      insert_KD_tree_node((2 * index), startIndex, split);
-      // Right Child
-      insert_KD_tree_node(((2 * index) + 1), (split + 1), endIndex);
+      // Create a sub tree for the left child //
+      insert_KD_tree_node((2 * index), startindex, split);
+      // Create a sub tree for the right child //
+      insert_KD_tree_node(((2 * index) + 1), (split + 1), endindex);
     }
   else
     {
       // Mark the node as a leaf one //
-      kdTree[index].isLeaf = 1;
+      (kdtree + index)->isleaf = 1;
     }
 }
 
@@ -547,24 +630,24 @@ void insert_KD_tree_node(unsigned long index, unsigned long startIndex, unsigned
 void free_KD_tree()
 {
   // If the kd tree is empty //
-  if (kdTree == NULL)
+  if (kdtree == NULL)
     {
       // Do nothing //
       return;
     }
 
   // Free the kd tree //
-  free(kdTree);
-  kdTree = NULL;
+  free(kdtree);
+  kdtree = NULL;
 
-  kdTreeArraySize = 0;
+  kdtreearraysize = 0;
 }
 
 // *** dump_KD_tree *** //
 // Print the KD tree and its content. //
 void dump_KD_tree()
 {
-  if (kdTree == NULL)
+  if (kdtree == NULL)
     {
       printf(YEL"KD Tree Empty!\r\n"NRM);
       return;
@@ -589,20 +672,21 @@ inline void dump_tabs(int depth)
 
 // *** dump_KD_node *** //
 // Print a given node of the KD tree in a certain depth. //
-// For the node print its start & end indexes of its     //
-// sub-array and its children, if its not a leaf node.   //
+// It prints the node's start & end indexes of its       //
+// subarray over the Sorting Array. If it not a leaf     //
+// node, it is recursively called to print its childen.  //
 void dump_KD_node(unsigned long index, int depth)
 {
   // Pint the start index of the node's sub-array //
   dump_tabs(depth);
-  printf(BLU"Start Index: "NRM"%lu\r\n", kdTree[index].startIndex);
+  printf(BLU"Start Index: "NRM"%lu\r\n", (kdtree + index)->startindex);
 
   // Pint the end index of the node's sub-array //
   dump_tabs(depth);
-  printf(BLU"End Index:   "NRM"%lu\r\n", kdTree[index].endIndex);
+  printf(BLU"End Index:   "NRM"%lu\r\n", (kdtree + index)->endindex);
 
   // Check if the node is leaf //
-  if (kdTree[index].isLeaf == 1)
+  if ((kdtree + index)->isleaf == 1)
     {
       // Print a corresponding message //
       dump_tabs(depth);
@@ -623,736 +707,1066 @@ void dump_KD_node(unsigned long index, int depth)
     }
 }
 
-// *** find_nearest_neighbour *** //
-unsigned long find_nearest_neighbour(unsigned long index, double x, double y)
+// *** find_nearest_neighbor *** //
+// Find the nearest neighbor element of the given set of coordinates.             //
+// Traverses through the KD-Tree until it finds the leaf which has elements in    //
+// an area where the given coordinates fit. On this leaf it checks the distances  //
+// off all the elements from the given point and returns the nearest. While       //
+// traversing backwards the tree towards the root, check on each node if the      //
+// distance of the current nearest neighbor is less or equal the vertical         //
+// distance between the split and the given point. If it is, the traverse the     //
+// unexplored child of this node, until you find the nearest neighbor from that   //
+// path. Then compare the distances of the two elements and keep the nearest one. //
+unsigned long find_nearest_neighbor(unsigned long index, double x, double y)
 {
-  double minDistance = 0;        // The minimum distance found //
-  double distance = 0;
-  double splitElementX = 0;
-  double splitElementY = 0;
-  unsigned long minIndex = 0;    // The index of the element with the minimum distance //
-  unsigned long secondIndex = 0;
+  double mindistance = 0;              // The minimum distance found //
+  double distance = 0;                 // Variable used for distance calculations //
+  double splitelementx = 0;            // Temporary variable used to for the x-coordinate of the split element //
+  double splitelementy = 0;            // Temporary variable used to for the y-coordinate of the split element //
+  double tempelementx = 0;             // Temporary variable used to for the x-coordinate of an element //
+  double tempelementy = 0;             // Temporary variable used to for the y-coordinate of an element //
+  unsigned long minindex = 0;          // The index of the element with the minimum distance //
+  unsigned long secondindex = 0;       // The index of the minimum distance from the node's other child //
+  unsigned long splitindex;            // The index of the element used for the split //
+  unsigned long sortingarrayindex = 0; // A field of the Sorting Array that is used as index to the Elements' Array //
   unsigned long i;
 
   // Check if the node is a leaf one //
-  if (kdTree[index].isLeaf == 1)
+  if ((kdtree + index)->isleaf == 1)
     {
-      // Find the point with the smallest distance between the points of the leaf //
-
-      // Start by assuming the first node has the smallest distance //
-      minIndex = kdTree[index].startIndex;
-      if (elementArray[sortingArray[minIndex]].type == point)
-      {
-        minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x, elementArray[sortingArray[minIndex]].y);
-      }
+      // Find the point with the smallest distance between the elements of the leaf //
+      // Start by assuming the first element has the smallest distance //
+      minindex = (kdtree + index)->startindex;
+      sortingarrayindex = *(sortingarray + minindex);
+      // If the element is a point //
+      if ((elementarray + sortingarrayindex)->type == point)
+        {
+          // Then its coordinates are the ones given from the fields x, y //
+          tempelementx = (elementarray + sortingarrayindex)->x;
+          tempelementy = (elementarray + sortingarrayindex)->y;
+        }
+      // If the element is not a point //
       else
         {
-          minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x + elementArray[sortingArray[minIndex]].width/2, elementArray[sortingArray[minIndex]].y + elementArray[sortingArray[minIndex]].height/2);
+          // Then the coordinates used are the ones from its center, since the x, y fields are the coordinates of the top left corner // 
+          tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+          tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
         }
+      mindistance = euclidean_distance(x, y, tempelementx, tempelementy);
       
-      // Run through the rest of the points //
-      for (i = (kdTree[index].startIndex + 1); i <= kdTree[index].endIndex; i++)
+      // Run through the rest of the elements of the subarray //
+      for (i = ((kdtree + index)->startindex + 1); i <= (kdtree + index)->endindex; i++)
         {
-          // If a point's distance is less than the current minimum distance //
-          if (elementArray[sortingArray[i]].type == point)
+          // Find the distance of the element and the given point //
+          sortingarrayindex = *(sortingarray + i);
+          // If the element is a point //
+          if ((elementarray + sortingarrayindex)->type == point)
             {
-              distance = euclidean_distance(x, y, elementArray[sortingArray[i]].x, elementArray[sortingArray[i]].y);
+              // Then its coordinates are the ones given from the fields x, y //
+              tempelementx = (elementarray + sortingarrayindex)->x;
+              tempelementy = (elementarray + sortingarrayindex)->y;
             }
+          // If the element is not a point //
           else
             {
-              distance = euclidean_distance(x, y, elementArray[sortingArray[i]].x + elementArray[sortingArray[i]].width/2, elementArray[sortingArray[i]].y + elementArray[sortingArray[i]].height/2);
+              // Then the coordinates used are the ones from its center, since the x, y fields are the coordinates of the top left corner // 
+              tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+              tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
             }
+          distance = euclidean_distance(x, y, tempelementx, tempelementy);
 
-          if (isless(distance, minDistance) == 1)
+          // If the element's distance is less than the current minimum distance //
+          if (isless(distance, mindistance) == 1)
             {
               // Change the minimum distance as well as the corresponding point //
-              minDistance = distance;
-              minIndex = i;
+              mindistance = distance;
+              minindex = i;
             }
         }
 
-      #ifdef DEBUG
+      #ifdef DEBUGMODE
         {
-          printf(RED"DEBUG: "NRM"Nearest Neighbor on this leaf: %s\r\n", elementArray[sortingArray[minIndex]].name);
+          sortingarrayindex = *(sortingarray + minindex);
+          printf(RED"DEBUG: "NRM"Nearest Neighbor on this leaf: %s\r\n", (elementarray + sortingarrayindex)->name);
         }
       #endif
     }
-  // If it is not //
+  // If the node is not a leaf one //
   else
-  {
-    // Check the axis //
-    // For the x axis //
-    if (kdTree[index].axis == X_AXIS)
-      {
-        // If the given x coordinate is after the split //
-        if (elementArray[kdTree[index].splitIndex].type == point)
-          {
-            splitElementX = elementArray[kdTree[index].splitIndex].x;
-          }
-        else
-          {
-            splitElementX = elementArray[kdTree[index].splitIndex].x + elementArray[kdTree[index].splitIndex].width/2;
-          }
+    {
+      // Find the split element //
+      splitindex = (kdtree + index)->splitindex;
 
-        if (isgreater(x, splitElementX))
-          {
-            // Find the nearest neighbour on this half //
-            minIndex = find_nearest_neighbour(((2 * index) + 1), x, y);
-            
-            // If the distance between the given x and the split is less than the minimum distance //
-            if (elementArray[sortingArray[minIndex]].type == point)
-              {
-                minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x, elementArray[sortingArray[minIndex]].y);
-              }
-            else
-              {
-                minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x + elementArray[sortingArray[minIndex]].width/2, elementArray[sortingArray[minIndex]].y + elementArray[sortingArray[minIndex]].height/2);
-              }
-
-            if (islessequal(fabs(x - splitElementX), minDistance) == 1)
-              {
-                // Find the nearest neighbour on the other half and compare it with the previous //
-                secondIndex = find_nearest_neighbour((2 * index), x, y);
-                if (elementArray[sortingArray[secondIndex]].type == point)
-                  {
-                    distance = euclidean_distance(x, y, elementArray[sortingArray[secondIndex]].x, elementArray[sortingArray[secondIndex]].y);
-                  }
-                else
-                  {
-                    distance = euclidean_distance(x, y, elementArray[sortingArray[secondIndex]].x + elementArray[sortingArray[secondIndex]].width/2, elementArray[sortingArray[secondIndex]].y + elementArray[sortingArray[secondIndex]].height/2);
-                  }
-
-                // If the new distance is less //
-                if (isless(distance, minDistance) == 1)
-                  {
-                    // Keep the new point //
-                    minIndex = secondIndex;
-                  }
-              }
-          }
-        // If the given x coordinate is before or on the split //
-        else
-          {
-            // Find the nearest neighbour on this half //
-            minIndex = find_nearest_neighbour((2 * index), x, y);
-            
-            // If the distance between the given x and the split is less than the minimum distance //
-            if (elementArray[sortingArray[minIndex]].type == point)
-              {
-                minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x, elementArray[sortingArray[minIndex]].y);
-              }
-            else
-              {
-                minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x + elementArray[sortingArray[minIndex]].width/2, elementArray[sortingArray[minIndex]].y + elementArray[sortingArray[minIndex]].height/2);
-              }
-
-            if (islessequal(fabs(x - splitElementX), minDistance) == 1)
-            {
-              // Find the nearest neighbour on the other half and compare it with the previous //
-              secondIndex = find_nearest_neighbour(((2 * index) + 1), x, y);
-              if (elementArray[sortingArray[secondIndex]].type == point)
-                {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[secondIndex]].x, elementArray[sortingArray[secondIndex]].y);
-                }
-              else
-                {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[secondIndex]].x + elementArray[sortingArray[secondIndex]].width/2, elementArray[sortingArray[secondIndex]].y + elementArray[sortingArray[secondIndex]].height/2);
-                }
-
-              // If the new distance is less //
-              if (isless(distance, minDistance) == 1)
-                {
-                  // Keep the new point //
-                  minIndex = secondIndex;
-                }
-            }
-        }
-      }
-    // For the y axis //
-    else
-      {
-        // If the given y coordinate is after the split //
-        if (elementArray[kdTree[index].splitIndex].type == point)
-          {
-            splitElementY = elementArray[kdTree[index].splitIndex].y;
-          }
-        else
-          {
-            splitElementY = elementArray[kdTree[index].splitIndex].y + elementArray[kdTree[index].splitIndex].height/2;
-          }
-
-        if (isgreater(y, splitElementY))
+      // Check the axis of the node //
+      // If the node's elements have been sorted based on the X axis //
+      if ((kdtree + index)->axis == X_AXIS)
         {
-          // Find the nearest neighbour on this half //
-          minIndex = find_nearest_neighbour(((2 * index) + 1), x, y);
-          
-          // If the distance between the given y and the split is less than the minimum distance //
-          if (elementArray[sortingArray[minIndex]].type == point)
+          // Calculate the x-coordinate of the split element //
+          // If the split element is a point //
+          if ((elementarray + splitindex)->type == point)
             {
-              minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x, elementArray[sortingArray[minIndex]].y);
+              // Its x-coordinate is the one given //
+              splitelementx = (elementarray + splitindex)->x;
             }
+          // If the split element is not a point //
           else
             {
-              minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x + elementArray[sortingArray[minIndex]].width/2, elementArray[sortingArray[minIndex]].y + elementArray[sortingArray[minIndex]].height/2);
+              // Its x-coordinate is the one given plus walf the given width //
+              splitelementx = (elementarray + splitindex)->x + ((elementarray + splitindex)->width / 2);
             }
 
-          if (islessequal(fabs(y - splitElementY), minDistance) == 1)
+          // If the given x coordinate is after the split element //
+          if (isgreater(x, splitelementx))
             {
-              // Find the nearest neighbour on the other half and compare it with the previous //
-              secondIndex = find_nearest_neighbour((2 * index), x, y);
-              if (elementArray[sortingArray[secondIndex]].type == point)
+              // Find the nearest neighbor on this half //
+              minindex = find_nearest_neighbor(((2 * index) + 1), x, y);
+              
+              // Find the distance of the nearest neighbor //
+              sortingarrayindex = *(sortingarray + minindex);
+              // If the nearest element is a point //
+              if ((elementarray + sortingarrayindex)->type == point)
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[secondIndex]].x, elementArray[sortingArray[secondIndex]].y);
+                  // Its coordinates are the one given //
+                  tempelementx = (elementarray + sortingarrayindex)->x;
+                  tempelementy = (elementarray + sortingarrayindex)->y;
                 }
+              // If the nearest element is not a point //
               else
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[secondIndex]].x + elementArray[sortingArray[secondIndex]].width/2, elementArray[sortingArray[secondIndex]].y + elementArray[sortingArray[secondIndex]].height/2);
+                  // Its are on its center, since the given coordinate are those of the top left corner //
+                  tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                  tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
                 }
-              
-              // If the new distance is less //
-              if (isless(distance, minDistance) == 1)
+              mindistance = euclidean_distance(x, y, tempelementx, tempelementy);
+
+              // If the distance between the given x and the split is less than the minimum distance //
+              if (islessequal(fabs(x - splitelementx), mindistance) == 1)
                 {
-                  // Keep the new point //
-                  minIndex = secondIndex;
+                  // Find the nearest neighbor on the other half and compare it with the previous //
+                  secondindex = find_nearest_neighbor((2 * index), x, y);
+                  
+                  sortingarrayindex = *(sortingarray + secondindex);
+                  // If the nearest element on the second half is a point //
+                  if ((elementarray + sortingarrayindex)->type == point)
+                    {
+                      // Its coordinates are the one given //
+                      tempelementx = (elementarray + sortingarrayindex)->x;
+                      tempelementy = (elementarray + sortingarrayindex)->y;
+                    }
+                  // If the nearest element on the second half is not a point //
+                  else
+                    {
+                      // Its are on its center, since the given coordinate are those of the top left corner //
+                      tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                      tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
+                    }
+                  distance = euclidean_distance(x, y, tempelementx, tempelementy);
+
+                  // If the new distance is less //
+                  if (isless(distance, mindistance) == 1)
+                    {
+                      // Keep the new point as the nearest //
+                      minindex = secondindex;
+                    }
+                }
+            }
+          // If the given x coordinate is before or on the split element //
+          else
+            {
+              // Find the nearest neighbor on this half //
+              minindex = find_nearest_neighbor((2 * index), x, y);
+              
+              // Find the distance of the nearest neighbor //
+              sortingarrayindex = *(sortingarray + minindex);
+              // If the nearest element is a point //
+              if ((elementarray + sortingarrayindex)->type == point)
+                {
+                  // Its coordinates are the one given //
+                  tempelementx = (elementarray + sortingarrayindex)->x;
+                  tempelementy = (elementarray + sortingarrayindex)->y;
+                }
+              // If the nearest element is not a point //
+              else
+                {
+                  // Its are on its center, since the given coordinate are those of the top left corner //
+                  tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                  tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
+                }
+              mindistance = euclidean_distance(x, y, tempelementx, tempelementy);
+
+              // If the distance between the given x and the split is less than the minimum distance //
+              if (islessequal(fabs(x - splitelementx), mindistance) == 1)
+                {
+                  // Find the nearest neighbor on the other half and compare it with the previous //
+                  secondindex = find_nearest_neighbor(((2 * index) + 1), x, y);
+
+                  sortingarrayindex = *(sortingarray + secondindex);
+                  // If the nearest element on the second half is a point //
+                  if ((elementarray + sortingarrayindex)->type == point)
+                    {
+                      // Its coordinates are the one given //
+                      tempelementx = (elementarray + sortingarrayindex)->x;
+                      tempelementy = (elementarray + sortingarrayindex)->y;
+                    }
+                  // If the nearest element on the second half is not a point //
+                  else
+                    {
+                      // Its are on its center, since the given coordinate are those of the top left corner //
+                      tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                      tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
+                    }
+                  distance = euclidean_distance(x, y, tempelementx, tempelementy);
+
+                  // If the new distance is less //
+                  if (isless(distance, mindistance) == 1)
+                    {
+                      // Keep the new point as the nearest //
+                      minindex = secondindex;
+                    }
                 }
             }
         }
-        // If the given x coordinate is before or on the split //
-        else
-          {
-            // Find the nearest neighbour on this half //
-            minIndex = find_nearest_neighbour((2 * index), x, y);
-            
-            // If the distance between the given y and the split is less than the minimum distance //
-            if (elementArray[sortingArray[minIndex]].type == point)
-              {
-                minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x, elementArray[sortingArray[minIndex]].y);
-              }
-            else
-              {
-                minDistance = euclidean_distance(x, y, elementArray[sortingArray[minIndex]].x + elementArray[sortingArray[minIndex]].width/2, elementArray[sortingArray[minIndex]].y + elementArray[sortingArray[minIndex]].height/2);
-              }
+      // If the node's elements have been sorted based on the Y axis //
+      else
+        {
+          // Calculate the y-coordinate of the split element //
+          // If the split element is a point //
+          if ((elementarray + splitindex)->type == point)
+            {
+              // Its y-coordinate is the one given //
+              splitelementy = (elementarray + splitindex)->y;
+            }
+          // If the split element is not a point //
+          else
+            {
+              // Its y-coordinate is the one given plus walf the given height //
+              splitelementy = (elementarray + splitindex)->y + ((elementarray + splitindex)->height / 2);
+            }
 
-            if (islessequal(fabs(y - splitElementY), minDistance) == 1)
-              {
-                // Find the nearest neighbour on the other half and compare it with the previous //
-                secondIndex = find_nearest_neighbour(((2 * index) + 1), x, y);
-                if (elementArray[sortingArray[secondIndex]].type == point)
-                  {
-                    distance = euclidean_distance(x, y, elementArray[sortingArray[secondIndex]].x, elementArray[sortingArray[secondIndex]].y);
-                  }
-                else
-                  {
-                    distance = euclidean_distance(x, y, elementArray[sortingArray[secondIndex]].x + elementArray[sortingArray[secondIndex]].width/2, elementArray[sortingArray[secondIndex]].y + elementArray[sortingArray[secondIndex]].height/2);
-                  }
-                
-                // If the new distance is less //
-                if (isless(distance, minDistance) == 1)
-                  {
-                    minIndex = secondIndex;
-                  }
-              }
-          }
-      }
+          // If the given y coordinate is after the split //
+          if (isgreater(y, splitelementy))
+            {
+              // Find the nearest neighbor on this half //
+              minindex = find_nearest_neighbor(((2 * index) + 1), x, y);
+              
+              // Find the distance of the nearest neighbor //
+              sortingarrayindex = *(sortingarray + minindex);
+              // If the nearest element is a point //
+              if ((elementarray + sortingarrayindex)->type == point)
+                {
+                  // Its coordinates are the one given //
+                  tempelementx = (elementarray + sortingarrayindex)->x;
+                  tempelementy = (elementarray + sortingarrayindex)->y;
+                }
+              // If the nearest element is not a point //
+              else
+                {
+                  // Its are on its center, since the given coordinate are those of the top left corner //
+                  tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                  tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
+                }
+              mindistance = euclidean_distance(x, y, tempelementx, tempelementy);
 
-    #ifdef DEBUG
-    {
-      printf(RED"DEBUG: "NRM"Nearest Neighbor on this node: %s\r\n", elementArray[sortingArray[minIndex]].name);
+              // If the distance between the given y and the split is less than the minimum distance //
+              if (islessequal(fabs(y - splitelementy), mindistance) == 1)
+                {
+                  // Find the nearest neighbor on the other half and compare it with the previous //
+                  secondindex = find_nearest_neighbor((2 * index), x, y);
+                  
+                  sortingarrayindex = *(sortingarray + secondindex);
+                  // If the nearest element on the second half is a point //
+                  if ((elementarray + sortingarrayindex)->type == point)
+                    {
+                      // Its coordinates are the one given //
+                      tempelementx = (elementarray + sortingarrayindex)->x;
+                      tempelementy = (elementarray + sortingarrayindex)->y;
+                    }
+                  // If the nearest element on the second half is not a point //
+                  else
+                    {
+                      // Its are on its center, since the given coordinate are those of the top left corner //
+                      tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                      tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
+                    }
+                  distance = euclidean_distance(x, y, tempelementx, tempelementy);
+                  
+                  // If the new distance is less //
+                  if (isless(distance, mindistance) == 1)
+                    {
+                      // Keep the new point as the nearest //
+                      minindex = secondindex;
+                    }
+                }
+            }
+          // If the given y coordinate is before or on the split //
+          else
+            {
+              // Find the nearest neighbor on this half //
+              minindex = find_nearest_neighbor((2 * index), x, y);
+              
+              // Find the distance of the nearest neighbor //
+              sortingarrayindex = *(sortingarray + minindex);
+              // If the nearest element is a point //
+              if ((elementarray + sortingarrayindex)->type == point)
+                {
+                  // Its coordinates are the one given //
+                  tempelementx = (elementarray + sortingarrayindex)->x;
+                  tempelementy = (elementarray + sortingarrayindex)->y;
+                }
+              // If the nearest element is not a point //
+              else
+                {
+                  // Its are on its center, since the given coordinate are those of the top left corner //
+                  tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                  tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
+                }
+              mindistance = euclidean_distance(x, y, tempelementx, tempelementy);
+
+               // If the distance between the given y and the split is less than the minimum distance //
+              if (islessequal(fabs(y - splitelementy), mindistance) == 1)
+                {
+                  // Find the nearest neighbor on the other half and compare it with the previous //
+                  secondindex = find_nearest_neighbor(((2 * index) + 1), x, y);
+                  
+                  sortingarrayindex = *(sortingarray + secondindex);
+                  // If the nearest element on the second half is a point //
+                  if ((elementarray + sortingarrayindex)->type == point)
+                    {
+                      // Its coordinates are the one given //
+                      tempelementx = (elementarray + sortingarrayindex)->x;
+                      tempelementy = (elementarray + sortingarrayindex)->y;
+                    }
+                  // If the nearest element on the second half is not a point //
+                  else
+                    {
+                      // Its are on its center, since the given coordinate are those of the top left corner //
+                      tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                      tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
+                    }
+                  distance = euclidean_distance(x, y, tempelementx, tempelementy);
+                  
+                  // If the new distance is less //
+                  if (isless(distance, mindistance) == 1)
+                    {
+                      // Keep the new point as the nearest //
+                      minindex = secondindex;
+                    }
+                }
+            }
+        }
+
+      #ifdef DEBUGMODE
+        {
+          sortingarrayindex = *(sortingarray + minindex);
+          printf(RED"DEBUG: "NRM"Nearest Neighbor on this node: %s\r\n", (elementarray + sortingarrayindex)->name);
+        }
+      #endif
     }
-    #endif
-  }
   
   // Return the index of the nearest point //
-  return minIndex;
+  return minindex;
 }
 
-// *** dump_nearest *** //
+// *** dump_nearest_neighbor *** //
+// Print the nearest neighbor element from a given set of coordinates.    //
+// The function works as a wrapper for function find_nearest_neighbors(), //
+// where its result is printed to the user.                               //
 void dump_nearest_neighbor(double x, double y)
 {
-  printf("\r\nNearest Neighbor: %s\r\n\n", elementArray[sortingArray[find_nearest_neighbour(ROOT_NODE, x, y)]].name);
+  unsigned long nearestneighborindex = 0; // The index of the nearest element //
+  unsigned long sortingarrayindex = 0;    // A field of the Sorting Array that is used as index to the Elements' Array //
+
+  // Find the nearest neighbor element //
+  nearestneighborindex = find_nearest_neighbor(ROOT_NODE, x, y);
+  
+  // Print the nearest neighbor element //
+  sortingarrayindex = *(sortingarray + nearestneighborindex);
+  printf("\r\nNearest Neighbor: %s\r\n\n", (elementarray + sortingarrayindex)->name);
 }
 
-// *** find_nearest_neighbours_within_radius *** //
-unsigned long *find_nearest_neighbours_within_radius(unsigned long index, double x, double y, double radius, unsigned long *noofNeighbors)
+// *** find_nearest_neighbors_within_radius *** //
+// Find the nearest neighbor elements within a radius from a given set of coordinates.    //
+// Traverses through the KD-Tree until it finds the leaf which has elements in an area    //
+// where the given coordinates fit. On this leaf it checks the distances off all the      //
+// elements from the given point and returns all the neighbors whose distance is less or  //
+// equal the given radius. If there are no neighbors within this radius, it returns NULL. //
+// While traversing backwards the tree towards the root, check on each node if the given  //
+// radius is less or equal the vertical distance between the split and the given point.   //
+// If it is, the traverse the unexplored child of this node, and check if there are any   //
+// neighbor elements within that radius. If there are, add them to the others.            //
+unsigned long *find_nearest_neighbors_within_radius(unsigned long index, double x, double y, double radius, unsigned long *noofneighbors)
 {
-  double distance = 0;
-  double splitElementX = 0;
-  double splitElementY = 0;
-  unsigned long *indexes = NULL;
-  unsigned long *newIndexes = NULL;
-  unsigned long noofIndexes = 0;
-  unsigned long noofNewIndexes = 0;
+  double distance = 0;                 // Variable used for distance calculations //
+  double splitelementx = 0;            // Temporary variable used to for the x-coordinate of the split element //
+  double splitelementy = 0;            // Temporary variable used to for the y-coordinate of the split element //
+  double tempelementx = 0;             // Temporary variable used to for the x-coordinate of an element //
+  double tempelementy = 0 ;            // Temporary variable used to for the y-coordinate of an element //
+  unsigned long *indexes = NULL;       // Array used for the indexes of the elements within radius //
+  unsigned long *newindexes = NULL;    // Array used for the indexes of the elements within radius from the unexplored child of the node //
+  unsigned long noofindexes = 0;       // Number of elements within radius //
+  unsigned long noofnewindexes = 0;    // Number of elements within radius from the unexplored child of the node //
+  unsigned long splitindex = 0;        // The index of the element used for the split //
+  unsigned long sortingarrayindex = 0; // A field of the Sorting Array that is used as index to the Elements' Array //
   unsigned long i;
 
   // Check if the node is a leaf one //
-  if (kdTree[index].isLeaf == 1)
+  if ((kdtree + index)->isleaf == 1)
     {
-      // Run through the points //
-      for (i = kdTree[index].startIndex; i <= kdTree[index].endIndex; i++)
+      // Run through the elements of the subarray //
+      for (i = (kdtree + index)->startindex; i <= (kdtree + index)->endindex; i++)
         {
           // Find the distance between point and given coordinates //
-          if (elementArray[sortingArray[i]].type == point)
+          sortingarrayindex = *(sortingarray + i);
+          // If the element is a point //
+          if ((elementarray + sortingarrayindex)->type == point)
             {
-              distance = euclidean_distance(x, y, elementArray[sortingArray[i]].x, elementArray[sortingArray[i]].y);
+              // Then its coordinates are the ones given from the fields x, y //
+              tempelementx = (elementarray + sortingarrayindex)->x;
+              tempelementy = (elementarray + sortingarrayindex)->y;
             }
+          // If the element is not a point /
           else
             {
-              distance = euclidean_distance(x, y, elementArray[sortingArray[i]].x + elementArray[sortingArray[i]].width/2, elementArray[sortingArray[i]].y + elementArray[sortingArray[i]].height/2);
+              // Then the coordinates used are the ones from its center, since the x, y fields are the coordinates of the top left corner // 
+              tempelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+              tempelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
             }
+          distance = euclidean_distance(x, y, tempelementx, tempelementy);
 
           // If the distance is less or equal to the radius //
           if (islessequal(distance, radius) == 1)
             {
-              // Add the point to the list
-              indexes = (unsigned long *) realloc(indexes, (noofIndexes + 1) * sizeof(unsigned long));
+              // Add the element to the list //
+              indexes = (unsigned long *) realloc(indexes, (noofindexes + 1) * sizeof(unsigned long));
               assert(indexes != NULL);
 
-              indexes[noofIndexes] = i;
-              noofIndexes++;
+              *(indexes + noofindexes) = i;
+              noofindexes++;
             }
         }
-    }
-  // If it is not //
-  else
-    {
-      // Check the axis //
-      // For the x axis //
-      if (kdTree[index].axis == X_AXIS)
+
+      #ifdef DEBUGMODE
         {
-          // If the given x coordinate is after the split //
-          if (elementArray[kdTree[index].splitIndex].type == point)
+          // If there were neighbor elements within the radius //
+          if (indexes != NULL)
             {
-              splitElementX = elementArray[kdTree[index].splitIndex].x;
+              printf(RED"DEBUG: "NRM"Nearest Neighbors within radius on this leaf:\r\n");
+
+              // Print the neighbor elements //
+              for (i = 0; i < noofindexes; i++)
+                {
+                  sortingarrayindex = *(sortingarray + *(indexes + i));
+                  printf("\t%s\r\n", (elementarray + sortingarrayindex)->name);
+                }
             }
+          // If there were not any neighbor elements within the radius //
           else
             {
-              splitElementX = elementArray[kdTree[index].splitIndex].x + elementArray[kdTree[index].splitIndex].width/2;
+              // Print a corresponding message //
+              printf(RED"DEBUG: "YEL"No neighbors within radius on this leaf!\r\n"NRM);
+            }
+        }
+      #endif
+    }
+  // If the node is not a leaf one //
+  else
+    {
+      // Find the split element //
+      splitindex = (kdtree + index)->splitindex;
+
+      // Check the axis of the node //
+      // If the node's elements have been sorted based on the X axis //
+      if ((kdtree + index)->axis == X_AXIS)
+        {
+          // Calculate the x-coordinate of the split element //
+          // If the split element is a point //
+          if ((elementarray + splitindex)->type == point)
+            {
+              // Its x-coordinate is the one given //
+              splitelementx = (elementarray + splitindex)->x;
+            }
+          // If the split element is not a point //
+          else
+            {
+              // Its x-coordinate is the one given plus walf the given width //
+              splitelementx = (elementarray + splitindex)->x + ((elementarray + splitindex)->width / 2);
             }
 
-          if (isgreater(x, splitElementX))
+          // If the given x coordinate is after the split element //
+          if (isgreater(x, splitelementx))
             {
-              // Find a list of points that are within radius on this half //
-              indexes = find_nearest_neighbours_within_radius(((2 * index) + 1), x, y, radius, &noofIndexes);
+              // Find a list of elements that are within radius on this half //
+              indexes = find_nearest_neighbors_within_radius(((2 * index) + 1), x, y, radius, &noofindexes);
               
               // If the distance between the given x and the split is less or equal with the radius //
-              if (islessequal(fabs(x - splitElementX), radius) == 1)
+              if (islessequal(fabs(x - splitelementx), radius) == 1)
                 {
-                  // Find if there are points within the range on the other half //
-                  newIndexes = find_nearest_neighbours_within_radius((2 * index), x, y, radius, &noofNewIndexes);
+                  // Find if there are elements within the radius on the other half //
+                  newindexes = find_nearest_neighbors_within_radius((2 * index), x, y, radius, &noofnewindexes);
 
-                  // If there are //
-                  if (newIndexes != NULL)
+                  // If there are elements within the radius on the other half //
+                  if (newindexes != NULL)
                     {
-                      // Add them to the list //
-                      indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+                      // Add the element to the list //
+                      indexes = (unsigned long *) realloc(indexes, (noofindexes + noofnewindexes) * sizeof(unsigned long));
                       assert(indexes != NULL);
-                      memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-                      noofIndexes += noofNewIndexes;
-                      free(newIndexes);
+                      memcpy((indexes + noofindexes), newindexes, noofnewindexes * sizeof(unsigned long));
+                      noofindexes += noofnewindexes;
+                      free(newindexes);
                     }
                 }
             }
           // If the given x coordinate is before or on the split //
           else
             {
-              // Find a list of points that are within radius on this half //
-              indexes = find_nearest_neighbours_within_radius((2 * index), x, y, radius, &noofIndexes);
+              // Find a list of elements that are within radius on this half //
+              indexes = find_nearest_neighbors_within_radius((2 * index), x, y, radius, &noofindexes);
               
               // If the distance between the given x and the split is less or equal with the radius //
-              if (islessequal(fabs(x - splitElementX), radius) == 1)
+              if (islessequal(fabs(x - splitelementx), radius) == 1)
                 {
-                  // Find if there are points within the range on the other half //
-                  newIndexes = find_nearest_neighbours_within_radius(((2 * index) + 1), x, y, radius, &noofNewIndexes);
+                  // Find if there are elements within the range on the other half //
+                  newindexes = find_nearest_neighbors_within_radius(((2 * index) + 1), x, y, radius, &noofnewindexes);
 
-                  // If there are //
-                  if (newIndexes != NULL)
+                  // If there are elements within the radius on the other half //
+                  if (newindexes != NULL)
                     {
-                      // Add them to the list //
-                      indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+                      // Add the element to the list //
+                      indexes = (unsigned long *) realloc(indexes, (noofindexes + noofnewindexes) * sizeof(unsigned long));
                       assert(indexes != NULL);
-                      memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-                      noofIndexes += noofNewIndexes;
-                      free(newIndexes);
+                      memcpy((indexes + noofindexes), newindexes, noofnewindexes * sizeof(unsigned long));
+                      noofindexes += noofnewindexes;
+                      free(newindexes);
                     }
                 }
             }
         }
-      // For the y axis //
+      // If the node's elements have been sorted based on the Y axis //
       else
         {
-          // If the given y coordinate is after the split //
-          // If the given y coordinate is after the split //
-          if (elementArray[kdTree[index].splitIndex].type == point)
+          // Calculate the y-coordinate of the split element //
+          // If the split element is a point //
+          if ((elementarray + splitindex)->type == point)
             {
-              splitElementX = elementArray[kdTree[index].splitIndex].y;
+              // Its y-coordinate is the one given //
+              splitelementy = (elementarray + splitindex)->y;
             }
+          // If the split element is not a point //
           else
             {
-              splitElementY = elementArray[kdTree[index].splitIndex].y + elementArray[kdTree[index].splitIndex].height/2;
+              // Its y-coordinate is the one given plus walf the given height //
+              splitelementy = (elementarray + splitindex)->y + ((elementarray + splitindex)->height / 2);
             }
 
-          if (isgreater(y, splitElementY))
+          // If the given y coordinate is after the split //
+          if (isgreater(y, splitelementy))
             {
-              // Find a list of points that are within radius on this half //
-              indexes = find_nearest_neighbours_within_radius(((2 * index) + 1), x, y, radius, &noofIndexes);
+              // Find a list of elements that are within radius on this half //
+              indexes = find_nearest_neighbors_within_radius(((2 * index) + 1), x, y, radius, &noofindexes);
               
               // If the distance between the given y and the split is less or equal with the radius //
-              if (islessequal(fabs(y - splitElementY), radius) == 1)
+              if (islessequal(fabs(y - splitelementy), radius) == 1)
                 {
-                  // Find if there are points within the range on the other half //
-                  newIndexes = find_nearest_neighbours_within_radius((2 * index), x, y, radius, &noofNewIndexes);
+                  // Find if there are elements within the range on the other half //
+                  newindexes = find_nearest_neighbors_within_radius((2 * index), x, y, radius, &noofnewindexes);
                   
-                  // If there are //
-                  if (newIndexes != NULL)
+                  // If there are elements within the radius on the other half //
+                  if (newindexes != NULL)
                     {
-                      // Add them to the list //
-                      indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+                       // Add the element to the list //
+                      indexes = (unsigned long *) realloc(indexes, (noofindexes + noofnewindexes) * sizeof(unsigned long));
                       assert(indexes != NULL);
-                      memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-                      noofIndexes += noofNewIndexes;
-                      free(newIndexes);
+                      memcpy((indexes + noofindexes), newindexes, noofnewindexes * sizeof(unsigned long));
+                      noofindexes += noofnewindexes;
+                      free(newindexes);
                     }
                 }
             }
           // If the given y coordinate is before or on the split //
           else
             {
-              // Find a list of points that are within radius on this half //
-              indexes = find_nearest_neighbours_within_radius((2 * index), x, y, radius, &noofIndexes);
+              // Find a list of elements that are within radius on this half //
+              indexes = find_nearest_neighbors_within_radius((2 * index), x, y, radius, &noofindexes);
               
               // If the distance between the given x and the split is less or equal with the radius //
-              if (islessequal(fabs(y - splitElementY), radius) == 1)
+              if (islessequal(fabs(y - splitelementy), radius) == 1)
                 {
-                  // Find if there are points within the range on the other half //
-                  newIndexes = find_nearest_neighbours_within_radius(((2 * index) + 1), x, y, radius, &noofNewIndexes);
+                  // Find if there are elements within the range on the other half //
+                  newindexes = find_nearest_neighbors_within_radius(((2 * index) + 1), x, y, radius, &noofnewindexes);
                   
-                  // If there are //
-                  if (newIndexes != NULL)
+                  // If there are elements within the radius on the other half //
+                  if (newindexes != NULL)
                     {
-                      // Add them to the list //
-                      indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+                      // Add the element to the list //
+                      indexes = (unsigned long *) realloc(indexes, (noofindexes + noofnewindexes) * sizeof(unsigned long));
                       assert(indexes != NULL);
-                      memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-                      noofIndexes += noofNewIndexes;
-                      free(newIndexes);
+                      memcpy((indexes + noofindexes), newindexes, noofnewindexes * sizeof(unsigned long));
+                      noofindexes += noofnewindexes;
+                      free(newindexes);
                     }
                 }
             }
         }
+
+      #ifdef DEBUGMODE
+        {
+          // If there were neighbor elements within the radius //
+          if (indexes != NULL)
+            {
+              printf(RED"DEBUG: "NRM"Nearest Neighbors within radius on this node:\r\n");
+
+              // Print the neighbor elements //
+              for (i = 0; i < noofindexes; i++)
+                {
+                  sortingarrayindex = *(sortingarray + *(indexes + i));
+                  printf("\t%s\r\n", (elementarray + sortingarrayindex)->name);
+                }
+            }
+          // If there were not any neighbor elements within the radius //
+          else
+            {
+              // Print a corresponding message //
+              printf(RED"DEBUG: "YEL"No neighbors within radius on this node!\r\n"NRM);
+            }
+        }
+      #endif
     }
   
   // Pass the number of indexes //
-  *noofNeighbors = noofIndexes;
+  *noofneighbors = noofindexes;
 
   // Return the array of the indexes //
   return indexes;
 }
 
-// *** dump_nearest_neighbours_within_radius *** //
-void dump_nearest_neighbours_within_radius(double x, double y, double radius)
+// *** dump_nearest_neighbors_within_radius *** //
+// Print the nearest neighbor elements, if there are any,       //
+// within a given radius from the given set of coordinates.     //
+// The function works as a wrapper for function                 //
+// find_nearest_neighbors_within_radius(), where its result is  //
+// printed to the user, whether an element is found or not.     //
+void dump_nearest_neighbors_within_radius(double x, double y, double radius)
 {
-  unsigned long *indexes = NULL;
+  unsigned long *indexes = NULL;       // Array used for the indexes of nearest neighbors within radius //
+  unsigned long noofindexes = 0;       // Number of elements within radius //
+  unsigned long sortingarrayindex = 0; // A field of the Sorting Array that is used as index to the Elements' Array //
   unsigned long i = 0;
-  unsigned long noofIndexes = 0;
 
-  indexes = find_nearest_neighbours_within_radius(ROOT_NODE, x, y, radius, &noofIndexes);
+  // Search for neighbor element within the radius //
+  indexes = find_nearest_neighbors_within_radius(ROOT_NODE, x, y, radius, &noofindexes);
   
+  // If there were neighbor elements within the radius //
   if (indexes != NULL)
     {
       printf("\r\nNeighbors within radius:\r\n");
 
-      for (i = 0; i < noofIndexes; i++)
+      // Print the neighbor elements //
+      for (i = 0; i < noofindexes; i++)
         {
-          printf("\t%s\r\n", elementArray[sortingArray[indexes[i]]].name);
+          sortingarrayindex = *(sortingarray + *(indexes + i));
+          printf("\t%s\r\n", (elementarray + sortingarrayindex)->name);
         }
-
       putchar('\n');
+
+      // Free the array with the neighbors //
       free(indexes);
     }
+  // If there were not any neighbor elements within the radius //
   else
     {
+      // Print a corresponding message //
       printf(YEL"\r\nNo neighbors within radius!\r\n\n"NRM);
     }
 }
 
-// *** find_k_nearest_neighbours *** //
-unsigned long *find_k_nearest_neighbours(unsigned long index, double x, double y, unsigned long k, unsigned long *noofNeighbors)
+// *** find_k_nearest_neighbors *** //
+// Find the k nearest neighbor elements from a given set of coordinates             //
+// Traverses through the KD-Tree until it finds the leaf which has elements in an   //
+// area where the given coordinates fit. On this leaf sort all the elements based   //
+// on their distance from the given point. If the number of elements on the leaf    //
+// exceed the required number, return only the k nearest. While traversing          //
+// backwards the tree towards the root, check on each node if the distance of the   //
+// furthest of the nearest neighbors is less or equal the vertical distance between //
+// the split and the given point. If it is, the traverse the unexplored child of    //
+// this node, until you find the k nearest neighbors from that path. After that,    //
+// sort all the found neighbors based on their distances from the given point. If   //
+// their number exceeds k, keep only the k nearest.                                 //
+unsigned long *find_k_nearest_neighbors(unsigned long index, double x, double y, unsigned long k, long *noofneighbors)
 {
-  unsigned long *indexes = NULL;
-  unsigned long *newIndexes = NULL;
-  unsigned long noofIndexes = 0;
-  unsigned long noofNewIndexes = 0;
+  double distance = 0;                 // Variable used for distance calculations //
+  double splitelementx = 0;            // Temporary variable used to for the x-coordinate of the split element //
+  double splitelementy = 0;            // Temporary variable used to for the y-coordinate of the split element //
+  double furthestelementx = 0;         // Temporary variable used to for the x-coordinate of the furthest nearest element //
+  double furthestelementy = 0;         // Temporary variable used to for the y-coordinate of the furthest nearest element //
+  long noofindexes = 0;                // Number of elements within radius //
+  long noofnewindexes = 0;             // Number of elements within radius from the unexplored child of the node //
+  unsigned long *indexes = NULL;       // Array used for the indexes for the elements //
+  unsigned long *newindexes = NULL;    // Array used for the indexes for the elements from the unexplored child of the node //
+  unsigned long splitindex = 0;        // The index of the element used for the split //
+  unsigned long sortingarrayindex = 0; // A field of the Sorting Array that is used as index to the Elements' Array //
   unsigned long i, j;
-  double distance = 0;
-  double splitElementX = 0;
-  double splitElementY = 0;
 
   // Assign the given coordinates to the global variables used in sorting //
-  tempX = x;
-  tempY = y;
+  refpointx = x;
+  refpointy = y;
 
   // Check if the node is a leaf one //
-  if (kdTree[index].isLeaf == true)
+  if ((kdtree + index)->isleaf == true)
     {
-      // Create an array the size of all the points designated to the leaf //
-      noofIndexes = kdTree[index].endIndex - kdTree[index].startIndex + 1;
-      indexes = (unsigned long *) calloc(noofIndexes, sizeof(unsigned long));
+      // Create an array the size of all the elements designated to the leaf //
+      noofindexes = (kdtree + index)->endindex - (kdtree + index)->startindex + 1;
+      indexes = (unsigned long *) calloc(noofindexes, sizeof(unsigned long));
       assert(indexes != NULL);
 
       // Run through the array //
-      for (i = 0, j = kdTree[index].startIndex; j <= kdTree[index].endIndex; i++, j++)
+      for (i = 0, j = (kdtree + index)->startindex; j <= (kdtree + index)->endindex; i++, j++)
         {
-          // Fill it with the indexes of the points //
+          // Fill it with the indexes of the elements //
           indexes[i] = j;
         }
 
-      // Sort the array of indexes based on their distance from the given coordinates //
-      qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+      // Sort the array of indexes based on the elements distances from the given coordinates //
+      qsort(indexes, noofindexes, sizeof(struct pointHashElement *), distance_comparator);
 
       // If the number of indexes in the leaf exceed the number of required neighbors //
-      if (noofIndexes > k)
-      {
-        // Shrink the array to the required size //
-        indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
-        noofIndexes = k;
-      }
+      if (noofindexes > k)
+        {
+          // Shrink the array to the required size //
+          indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
+          noofindexes = k;
+        }
+
+      #ifdef DEBUGMODE
+        {
+          printf(RED"DEBUG: "NRM"Nearest Neighbors on this leaf:\r\n");
+
+          // Print the neighbor elements //
+          for (i = 0; i < noofindexes; i++)
+            {
+              sortingarrayindex = *(sortingarray + *(indexes + i));
+              printf("\t%s\r\n", (elementarray + sortingarrayindex)->name);
+            }
+        }
+      #endif
     }
-  // If it is not //
+  // If the node is not a leaf one //
   else
     {
-      // Check the axis //
-      // For the x axis //
-      if (kdTree[index].axis == X_AXIS)
+      // Find the split element //
+      splitindex = (kdtree + index)->splitindex;
+
+      // Check the axis of the node //
+      // If the node's elements have been sorted based on the X axis //
+      if ((kdtree + index)->axis == X_AXIS)
         {
-          // If the given x coordinate is after the split //
-          if (elementArray[kdTree[index].splitIndex].type == point)
+          // Calculate the x-coordinate of the split element //
+          // If the split element is a point //
+          if ((elementarray + splitindex)->type == point)
             {
-              splitElementX = elementArray[kdTree[index].splitIndex].x;
+              // Its x-coordinate is the one given //
+              splitelementx = (elementarray + splitindex)->x;
             }
+          // If the split element is not a point //
           else
             {
-              splitElementX = elementArray[kdTree[index].splitIndex].x + elementArray[kdTree[index].splitIndex].width/2;
+              // Its x-coordinate is the one given plus walf the given width //
+              splitelementx = (elementarray + splitindex)->x + ((elementarray + splitindex)->width / 2);
             }
 
-          if (isgreater(x, splitElementX))
+          // If the given x coordinate is after the split element //
+          if (isgreater(x, splitelementx))
             {
-              // Find the nearest points on this half //
-              indexes = find_k_nearest_neighbours(((2 * index) + 1), x, y, k, &noofIndexes);
+              // Find the k nearest elements on this half //
+              indexes = find_k_nearest_neighbors(((2 * index) + 1), x, y, k, &noofindexes);
 
-              // If the distance between the given x and the furthest point is //
-              // less or equal the distance between the given x and the split  //
-              if (elementArray[sortingArray[indexes[noofIndexes - 1]]].type == point)
+              // Find the distance of the furthest neighbor element //
+              // The elements are sorted based on their distances from the given //
+              // point, therefore the last element of the array is the furthest  //
+              sortingarrayindex = *(sortingarray + *(indexes + (noofindexes - 1)));
+              // If the furthes element is a point //
+              if ((elementarray + sortingarrayindex)->type == point)
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[indexes[noofIndexes - 1]]].x, elementArray[sortingArray[indexes[noofIndexes - 1]]].y);
+                  // Its coordinates are the one given //
+                  furthestelementx = (elementarray + sortingarrayindex)->x;
+                  furthestelementy = (elementarray + sortingarrayindex)->y;
                 }
+              // If the furtest element is not a point //
               else
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[indexes[noofIndexes - 1]]].x + elementArray[sortingArray[indexes[noofIndexes - 1]]].width/2, elementArray[sortingArray[indexes[noofIndexes - 1]]].y + elementArray[sortingArray[indexes[noofIndexes - 1]]].height/2);
+                  // Its coordinnates are given from its center, and not its top left corner //
+                  furthestelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                  furthestelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
                 }
+              distance = euclidean_distance(x, y, furthestelementx, furthestelementy);
 
-              if (islessequal(fabs(x - splitElementX), distance) == 1)
+              // If the distance between the given x and the split is less or equal the furthest distance //
+              if (islessequal(fabs(x - splitelementx), distance) == 1)
                 {
-                  // Find the nearest points on the other half //
-                  newIndexes = find_k_nearest_neighbours((index * 2), x, y, k, &noofNewIndexes);
-                  assert(newIndexes != NULL);
+                  // Find the k nearest elements on the other half //
+                  newindexes = find_k_nearest_neighbors((index * 2), x, y, k, &noofnewindexes);
+                  assert(newindexes != NULL);
 
-                  // Expand the current array //
-                  indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+                  // Expand the current array to accomodate the new neighbors //
+                  indexes = (unsigned long *) realloc(indexes, (noofindexes + noofnewindexes) * sizeof(unsigned long));
                   assert(indexes != NULL);
 
-                  // Add all the found points into the array //
-                  memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-                  free(newIndexes);
-                  noofIndexes += noofNewIndexes;
+                  // Add all the found elements into the array //
+                  memcpy(&indexes[noofindexes], newindexes, noofnewindexes * sizeof(unsigned long));
+                  noofindexes += noofnewindexes;
 
-                  // Sort the array //
-                  qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+                  // Free the array used for the other half's neighbor elements //
+                  free(newindexes);
 
-                  // If the number of fouund points exceed the requested number //
-                  if (noofIndexes > k)
+                  // Sort the expanded array //
+                  qsort(indexes, noofindexes, sizeof(struct pointHashElement *), distance_comparator);
+
+                  // If the number of found neighbors exceed the requested number //
+                  if (noofindexes > k)
                     {
-                      // Keep only the k nearest points //
+                      // Keep only the k nearest ones //
                       indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
                       assert(indexes != NULL);
-                      noofIndexes = k;
+                      noofindexes = k;
                     }
                 }
             }
           // If the given x coordinate is before or on the split //
           else
             {
-              // Find the nearest points on this half //
-              indexes = find_k_nearest_neighbours((index * 2), x, y, k, &noofIndexes);
+              // Find the k nearest elements on this half //
+              indexes = find_k_nearest_neighbors((index * 2), x, y, k, &noofindexes);
 
-              // If the distance between the given x and the furthest point is //
-              // less or equal the distance between the given x and the split  //
-              if (elementArray[sortingArray[indexes[noofIndexes - 1]]].type == point)
+              // Find the distance of the furthest neighbor element //
+              // The elements are sorted based on their distances from the given //
+              // point, therefore the last element of the array is the furthest  //
+              sortingarrayindex = *(sortingarray + *(indexes + (noofindexes - 1)));
+              // If the furthes element is a point //
+              if ((elementarray + sortingarrayindex)->type == point)
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[indexes[noofIndexes - 1]]].x, elementArray[sortingArray[indexes[noofIndexes - 1]]].y);
+                  // Its coordinates are the one given //
+                  furthestelementx = (elementarray + sortingarrayindex)->x;
+                  furthestelementy = (elementarray + sortingarrayindex)->y;
                 }
+              // If the furtest element is not a point //
               else
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[indexes[noofIndexes - 1]]].x + elementArray[sortingArray[indexes[noofIndexes - 1]]].width/2, elementArray[sortingArray[indexes[noofIndexes - 1]]].y + elementArray[sortingArray[indexes[noofIndexes - 1]]].height/2);
+                  // Its coordinnates are given from its center, and not its top left corner //
+                  furthestelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                  furthestelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
                 }
+              distance = euclidean_distance(x, y, furthestelementx, furthestelementy);
 
-              if (islessequal(fabs(x - splitElementX), distance) == 1)
+              // If the distance between the given x and the split is less or equal the furthest distance //
+              if (islessequal(fabs(x - splitelementx), distance) == 1)
                 {
-                  // Find the nearest points on the other half //
-                  newIndexes = find_k_nearest_neighbours(((2 * index) + 1), x, y, k, &noofNewIndexes);
-                  assert(newIndexes != NULL);
+                  // Find the k nearest elements on the other half //
+                  newindexes = find_k_nearest_neighbors(((2 * index) + 1), x, y, k, &noofnewindexes);
+                  assert(newindexes != NULL);
 
-                  // Expand the current array //
-                  indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+                  // Expand the current array to accomodate the new neighbors //
+                  indexes = (unsigned long *) realloc(indexes, (noofindexes + noofnewindexes) * sizeof(unsigned long));
                   assert(indexes != NULL);
 
-                  // Add all the found points into the array //
-                  memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-                  free(newIndexes);
-                  noofIndexes += noofNewIndexes;
+                  // Add all the found elements into the array //
+                  memcpy(&indexes[noofindexes], newindexes, noofnewindexes * sizeof(unsigned long));
+                  noofindexes += noofnewindexes;
 
-                  // Sort the array //
-                  qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+                  // Free the array used for the other half's neighbor elements //
+                  free(newindexes);
 
-                  // If the number of fouund points exceed the requested number //
-                  if (noofIndexes > k)
+                  // Sort the expanded array //
+                  qsort(indexes, noofindexes, sizeof(struct pointHashElement *), distance_comparator);
+
+                  // If the number of found neighbors exceed the requested number //
+                  if (noofindexes > k)
                     {
-                      // Keep only the k nearest points //
+                      // Keep only the k nearest ones //
                       indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
                       assert(indexes != NULL);
-                      noofIndexes = k;
+                      noofindexes = k;
                     }
                 }
             }
         }
-      // For the y axis //
+      // If the node's elements have been sorted based on the Y axis //
       else
         {
-          // If the given y coordinate is after the split //
-          if (elementArray[kdTree[index].splitIndex].type == point)
+          // Calculate the y-coordinate of the split element //
+          // If the split element is a point //
+          if ((elementarray + splitindex)->type == point)
             {
-              splitElementY = elementArray[kdTree[index].splitIndex].y;
+              // Its y-coordinate is the one given //
+              splitelementy = (elementarray + splitindex)->y;
             }
+          // If the split element is not a point //
           else
             {
-              splitElementY = elementArray[kdTree[index].splitIndex].y + elementArray[kdTree[index].splitIndex].height/2;
+              // Its y-coordinate is the one given plus walf the given height //
+              splitelementy = (elementarray + splitindex)->y + ((elementarray + splitindex)->height / 2);
             }
 
-          if (isgreater(y, splitElementY))
+          // If the given y coordinate is after the split //
+          if (isgreater(y, splitelementy))
             {
-              // Find the nearest points on this half //
-              indexes = find_k_nearest_neighbours(((2 * index) + 1), x, y, k, &noofIndexes);
+              // Find the k nearest elements on this half //
+              indexes = find_k_nearest_neighbors(((2 * index) + 1), x, y, k, &noofindexes);
 
-              // If the distance between the given y and the furthest point is //
-              // less or equal the distance between the given y and the split  //
-              if (elementArray[sortingArray[indexes[noofIndexes - 1]]].type == point)
+              // Find the distance of the furthest neighbor element //
+              // The elements are sorted based on their distances from the given //
+              // point, therefore the last element of the array is the furthest  //
+              sortingarrayindex = *(sortingarray + *(indexes + (noofindexes - 1)));
+              // If the furthes element is a point //
+              if ((elementarray + sortingarrayindex)->type == point)
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[indexes[noofIndexes - 1]]].x, elementArray[sortingArray[indexes[noofIndexes - 1]]].y);
+                  // Its coordinates are the one given //
+                  furthestelementx = (elementarray + sortingarrayindex)->x;
+                  furthestelementy = (elementarray + sortingarrayindex)->y;
                 }
+              // If the furtest element is not a point //
               else
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[indexes[noofIndexes - 1]]].x + elementArray[sortingArray[indexes[noofIndexes - 1]]].width/2, elementArray[sortingArray[indexes[noofIndexes - 1]]].y + elementArray[sortingArray[indexes[noofIndexes - 1]]].height/2);
+                  // Its coordinnates are given from its center, and not its top left corner //
+                  furthestelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                  furthestelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
                 }
+              distance = euclidean_distance(x, y, furthestelementx, furthestelementy);
 
-              if (islessequal(fabs(y - splitElementY), distance) == 1)
+              // If the distance between the given y and the split is less or equal the furthest distance //
+              if (islessequal(fabs(y - splitelementy), distance) == 1)
                 {
-                  // Find the nearest points on the other half //
-                  newIndexes = find_k_nearest_neighbours((index * 2), x, y, k, &noofNewIndexes);
-                  assert(newIndexes != NULL);
+                  // Find the k nearest elements on the other half //
+                  newindexes = find_k_nearest_neighbors((index * 2), x, y, k, &noofnewindexes);
+                  assert(newindexes != NULL);
 
-                  // Expand the current array //
-                  indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+                  // Expand the current array to accomodate the new neighbors //
+                  indexes = (unsigned long *) realloc(indexes, (noofindexes + noofnewindexes) * sizeof(unsigned long));
                   assert(indexes != NULL);
 
-                  // Add all the found points into the array //
-                  memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-                  free(newIndexes);
-                  noofIndexes += noofNewIndexes;
+                  // Add all the found elements into the array //
+                  memcpy(&indexes[noofindexes], newindexes, noofnewindexes * sizeof(unsigned long));
+                  noofindexes += noofnewindexes;
 
-                  // Sort the array //
-                  qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+                  // Free the array used for the other half's neighbor elements //
+                  free(newindexes);
 
-                  // If the number of fouund points exceed the requested number //
-                  if (noofIndexes > k)
+                  // Sort the expanded array //
+                  qsort(indexes, noofindexes, sizeof(struct pointHashElement *), distance_comparator);
+
+                  // If the number of found neighbors exceed the requested number //
+                  if (noofindexes > k)
                     {
-                      // Keep only the n nearest points //
+                      // Keep only the n nearest ones //
                       indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
                       assert(indexes != NULL);
-                      noofIndexes = k;
+                      noofindexes = k;
                     }
                 }
             }
           // If the given y coordinate is before or on the split //
           else
             {
-              // Find the nearest points on this half //
-              indexes = find_k_nearest_neighbours((index * 2), x, y, k, &noofIndexes);
+              // Find the k nearest elements on this half //
+              indexes = find_k_nearest_neighbors((index * 2), x, y, k, &noofindexes);
 
-              // If the distance between the given y and the furthest point is //
-              // less or equal the distance between the given y and the split  //
-              if (elementArray[sortingArray[indexes[noofIndexes - 1]]].type == point)
+              // Find the distance of the furthest neighbor element //
+              // The elements are sorted based on their distances from the given //
+              // point, therefore the last element of the array is the furthest  //
+              sortingarrayindex = *(sortingarray + *(indexes + (noofindexes - 1)));
+              // If the furthes element is a point //
+              if ((elementarray + sortingarrayindex)->type == point)
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[indexes[noofIndexes - 1]]].x, elementArray[sortingArray[indexes[noofIndexes - 1]]].y);
+                  // Its coordinates are the one given //
+                  furthestelementx = (elementarray + sortingarrayindex)->x;
+                  furthestelementy = (elementarray + sortingarrayindex)->y;
                 }
+              // If the furtest element is not a point //
               else
                 {
-                  distance = euclidean_distance(x, y, elementArray[sortingArray[indexes[noofIndexes - 1]]].x + elementArray[sortingArray[indexes[noofIndexes - 1]]].width/2, elementArray[sortingArray[indexes[noofIndexes - 1]]].y + elementArray[sortingArray[indexes[noofIndexes - 1]]].height/2);
+                  // Its coordinnates are given from its center, and not its top left corner //
+                  furthestelementx = (elementarray + sortingarrayindex)->x + ((elementarray + sortingarrayindex)->width / 2);
+                  furthestelementy = (elementarray + sortingarrayindex)->y + ((elementarray + sortingarrayindex)->height / 2);
                 }
+              distance = euclidean_distance(x, y, furthestelementx, furthestelementy);
 
-              if (islessequal(fabs(y - splitElementY), distance) == 1)
+              // If the distance between the given y and the split is less or equal the furthest distance //
+              if (islessequal(fabs(y - splitelementy), distance) == 1)
                 {
-                  // Find the nearest points on the other half //
-                  newIndexes = find_k_nearest_neighbours(((2 * index) + 1), x, y, k, &noofNewIndexes);
-                  assert(newIndexes != NULL);
+                  // Find the k nearest elements on the other half //
+                  newindexes = find_k_nearest_neighbors(((2 * index) + 1), x, y, k, &noofnewindexes);
+                  assert(newindexes != NULL);
 
-                  // Expand the current array //
-                  indexes = (unsigned long *) realloc(indexes, (noofIndexes + noofNewIndexes) * sizeof(unsigned long));
+                  // Expand the current array to accomodate the new neighbors //
+                  indexes = (unsigned long *) realloc(indexes, (noofindexes + noofnewindexes) * sizeof(unsigned long));
                   assert(indexes != NULL);
 
-                  // Add all the found points into the array //
-                  memcpy(&indexes[noofIndexes], newIndexes, noofNewIndexes * sizeof(unsigned long));
-                  free(newIndexes);
-                  noofIndexes += noofNewIndexes;
+                  // Add all the found elements into the array //
+                  memcpy(&indexes[noofindexes], newindexes, noofnewindexes * sizeof(unsigned long));
+                  noofindexes += noofnewindexes;
 
-                  // Sort the array //
-                  qsort(indexes, noofIndexes, sizeof(struct pointHashElement *), distance_comparator);
+                  // Free the array used for the other half's neighbor elements //
+                  free(newindexes);
 
-                  // If the number of fouund points exceed the requested number //
-                  if (noofIndexes > k)
+                  // Sort the expanded array //
+                  qsort(indexes, noofindexes, sizeof(struct pointHashElement *), distance_comparator);
+
+                  // If the number of found neighbors exceed the requested number //
+                  if (noofindexes > k)
                     {
-                      // Keep only the k nearest points //
+                      // Keep only the n nearest ones //
                       indexes = (unsigned long *) realloc(indexes, k * sizeof(unsigned long));
                       assert(indexes != NULL);
-                      noofIndexes = k;
+                      noofindexes = k;
                     }
                 }
             }
         }
+
+      #ifdef DEBUGMODE
+        {
+          printf(RED"DEBUG: "NRM"Nearest Neighbors on this node:\r\n");
+
+          // Print the neighbor elements //
+          for (i = 0; i < noofindexes; i++)
+            {
+              sortingarrayindex = *(sortingarray + *(indexes + i));
+              printf("\t%s\r\n", (elementarray + sortingarrayindex)->name);
+            }
+        }
+      #endif
     }
   
   // Pass the number of indexes //
-  *noofNeighbors = noofIndexes;
+  *noofneighbors = noofindexes;
   
   // Return the array of the indexes //
   return indexes;
 }
 
-// *** dump_k_nearest_neighbours *** //
-void dump_k_nearest_neighbours(double x, double y, unsigned long k)
+// *** dump_k_nearest_neighbors *** //
+// Print the k nearest neighbor elements from a given set of coordinates.       //
+// The function works as a wrapper for function find_k_nearest_neighbors(),     //
+// where its result is printed to the user, whether the elements are k or less. //
+void dump_k_nearest_neighbors(double x, double y, long k)
 {
-  unsigned long *indexes = NULL;
+  unsigned long *indexes = NULL;       // Array used for the indexes of k neighbors //
+  unsigned long sortingarrayindex = 0; // A field of the Sorting Array that is used as index to the Elements' Array //
+  long noofindexes = 0;                // Number of elements within radius //
   unsigned long i = 0;
-  unsigned long noofIndexes = 0;
 
-  indexes = find_k_nearest_neighbours(ROOT_NODE, x, y, k, &noofIndexes);
+  // Search for neighbor element within the radius //
+  indexes = find_k_nearest_neighbors(ROOT_NODE, x, y, k, &noofindexes);
   assert(indexes != NULL);
 
   printf("\r\nNearest Neighbors:\r\n");
 
-  for (i = 0; i < noofIndexes; i++)
+  // Print the neighbor elements //
+  for (i = 0; i < noofindexes; i++)
     {
-      printf("\t%s\r\n", elementArray[sortingArray[indexes[i]]].name);
+      sortingarrayindex = *(sortingarray + *(indexes + i));
+      printf("\t%s\r\n", (elementarray + sortingarrayindex)->name);
     }
-
   putchar('\n');
+
+  // Free the array with the neighbors //
   free(indexes);
 }

@@ -10,6 +10,8 @@ int main (int argc, char *argv[]){
   int expansion;
   int result;
   
+  initialise_globals();
+
   init_tcl(argv);
 
   init_readline();

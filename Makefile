@@ -25,7 +25,7 @@ knn: EXEC_FOOTER := $(GUI_FOOTER) $(MATH) $(TCL) $(READLINE)
 knn: $(OBJ) src/definitions.h
 	$(CC) $(CFLAGS) $(EXEC_HEADER) $^ -o $@ $(EXEC_FOOTER)
 
-debug: CFLAGS += -DDEBUG
+debug: CFLAGS += -DDEBUGMODE
 debug: new
 
 build/main.o: CFLAGS += -c

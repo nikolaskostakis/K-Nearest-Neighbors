@@ -9,72 +9,92 @@
 // Definitions //
 #define MAX_KDLEAF_ELEMENTS 5
 
-#define ROOT_NODE 1
+#define ROOT_NODE 1 // The index of the root node on the KD Tree     //
+                    // The first element of the array is not used    //
+                    // because the operations to find the chhildren  //
+                    // of the node are smoother if they start from 1 //
 
-#define X_AXIS 0
-#define Y_AXIS 1
+#define X_AXIS 0  // Defined value used to describe the usage   //
+                  // of the X axis form the node of the KD Tree //
+#define Y_AXIS 1  // Defined value used to describe the usage   //
+                  // of the Y axis form the node of the KD Tree //
 
-// Structuress for Points //
+// enum type: the type of knnelement //
+typedef enum {point = -1, cell, IO, module, other} knnelementtype;
 
-typedef enum {point = -1, cell, IO, module, other} knnElementType;
-
-struct knnElement
+// knnelement - from input file //
+// array of the stored elements //
+struct knnelement
 {
 	char *name;          // The name of the element //
-	double x;            // Its x coordinate //
-	double y;            // Its y coordinate //
-	knnElementType type; // The type of the element //
-	double width;        // Its width //
-	double height;       // Its height //
+	double x;            // The x coordinate of the element //
+	double y;            // The y coordinate of the element //
+	knnelementtype type; // The type of the element //
+	double width;        // The width of the element //
+	double height;       // The height of the element //
 };
 
-struct kdTreeNode
+// array reprsentation of the tree used for the NN Algorithms //
+struct kdtreenode
 {
-	int isLeaf;               // Flag used to determine if the node is a leaf //
-	int axis;                 // Defines the axis checked by this node //
-	unsigned long startIndex; // Starting Index of the node's sub-array //
-	unsigned long endIndex;   // Ending Index of the node's sub-array //
-	unsigned long splitIndex; // Index of the Element used to split the array //
+	int isleaf;               // Flag used to determine if the node is a leaf //
+	int axis;                 // Flag used to determine the axis used by this node //
+	unsigned long startindex; // Starting Index of the node's sub-array //
+	unsigned long endindex;   // Ending Index of the node's sub-array //
+	unsigned long splitindex; // Index of the Element used to split the array //
 	                          // The index is used to access the element and  // 
 	                          // use its coordinates for the NN algorithms    //
 };
 
+// The Max coordinates of elemenents //
+// They are used by UI for optimizing the design size //
+double elementmaxxcoordinate; // The max X coordinate of elements //
+double elementmaxycoordinate; // The max Y coordinate of elements //
 
-// Functions for Points //
+// KD-Tree //
+struct kdtreenode *kdtree;     // The KD Tree //
+unsigned long kdtreearraysize; // The size of the array that represents the tree //
 
-int point_x_comparator(const void *p1, const void *p2);
-int point_y_comparator(const void *p1, const void *p2);
+// Sorting Array used by KD-Tree //
+unsigned long *sortingarray;    // The Sorting Array //
+unsigned long sortingarraysize; // The size of the Sorting Array //
 
-void init_element_array(unsigned long size);
-void insert_element(char *name, double x, double y, int type, double width, double height);
-void insert_point(char *name, double x, double y);
+// Elements' Array //
+struct knnelement *elementarray; // The Elements' Array //
+unsigned long elementarraysize;  // The size of the Array //
+unsigned long elementarrayindex; // An index to the Element's Array. It is  //
+                                 // used to add a new element to the Array. //
+
+// Temporary Globals for coordinates //
+// They are used for sorting using qsort() //
+double refpointx, refpointy;
+
+void initialise_globals();
+int point_x_comparator(const void *, const void *);
+int point_y_comparator(const void *, const void *);
+void init_element_array(unsigned long);
+void insert_element(char *, double, double, int, double, double);
 void free_element_array();
 void dump_element_array();
-void dump_element_distances(double x, double y);
-char *get_element_name(unsigned long index);
-double get_element_x(unsigned long index);
-double get_element_y(unsigned long index);
-double get_element_width(unsigned long index);
-double get_element_height(unsigned long index);
-int get_element_type(unsigned long index);
-
+void dump_element_distances(double, double);
+char *get_element_name(unsigned long);
+double get_element_x(unsigned long);
+double get_element_y(unsigned long);
+double get_element_width(unsigned long);
+double get_element_height(unsigned long);
+int get_element_type(unsigned long);
 void create_sorting_array();
 void free_sorting_array();
 void dump_sorting_array();
-
 void create_KD_tree();
-void insert_KD_tree_node(unsigned long index, unsigned long startIndex, unsigned long endIndex);
+void insert_KD_tree_node(unsigned long, unsigned long, unsigned long);
 void free_KD_tree();
-
 void dump_KD_tree();
-void dump_tabs(int depth);
-void dump_KD_node(unsigned long index, int depth);
-
-unsigned long find_nearest_neighbour(unsigned long index, double x, double y);
-void dump_nearest_neighbor(double x, double y);
-
-unsigned long *find_nearest_neighbours_within_radius(unsigned long index, double x, double y, double radius, unsigned long *noofNeighbors);
-void dump_nearest_neighbours_within_radius(double x, double y, double range);
-
-unsigned long *find_k_nearest_neighbours(unsigned long index, double x, double y, unsigned long n, unsigned long *noofNeighbors);
-void dump_k_nearest_neighbours(double x, double y, unsigned long k);
+void dump_tabs(int);
+void dump_KD_node(unsigned long, int);
+unsigned long find_nearest_neighbor(unsigned long, double, double);
+void dump_nearest_neighbor(double, double);
+unsigned long *find_nearest_neighbors_within_radius(unsigned long, double, double, double, unsigned long *);
+void dump_nearest_neighbors_within_radius(double, double, double);
+unsigned long *find_k_nearest_neighbors(unsigned long, double, double, unsigned long, long *);
+void dump_k_nearest_neighbors(double, double, long);

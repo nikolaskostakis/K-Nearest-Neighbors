@@ -24,3 +24,6 @@ extern void init_readline();
 
 // From ui //
 extern void start_gui();
+
+// From structs //
+extern void initialise_globals();

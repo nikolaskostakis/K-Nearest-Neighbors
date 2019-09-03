@@ -1,3 +1,4 @@
 knn
 build/
 *.o
+gen_points_*.txt

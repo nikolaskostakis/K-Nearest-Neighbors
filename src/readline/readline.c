@@ -29,9 +29,9 @@ char *commands[] = {
   "less", "cat",
 
   // Custom commands //
-  "start_gui", "read_points", "print_element_array", "create_kdTree", "print_kdTree", "find_NN",
-  "clear_elements", "find_nearest_neighbours", "find_K_nearest_neighbours", "find_neighbours_within_radius",
-  "print_sorting_array",
+  "quit", "start_gui", "read_points", "print_element_array", "create_kdTree", "print_kdTree", "find_NN",
+  "clear_elements", "find_nearest_neighbors", "find_K_nearest_neighbors", "find_neighbors_within_radius",
+  "print_sorting_array", "read_drawbuffer_output",
 
   NULL
 };
@@ -51,8 +51,8 @@ char **custom_completion(const char *text, int start, int end)
 {
   char **matches = NULL;
   rl_completion_append_character = '\0';
-  //  If the wold is at the start of the line, then the custom completer is //
-  // used. Otherwise the default file completer of Readline is called.      //
+  // If the wold is at the start of the line, then the custom completer   //
+  // is used. Otherwise the default file completer of Readline is called. //
   if (start == 0)
     {
       return rl_completion_matches(text, custom_completer);

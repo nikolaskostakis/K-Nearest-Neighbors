@@ -65,21 +65,17 @@ void draw_point(double x, double y);
 // External Variables //
 
 // From structs //
-extern double pointMaxXCoordinate;
-extern double pointMaxYCoordinate;
-extern unsigned long elementArraySize;
+extern double elementmaxxcoordinate;
+extern double elementmaxycoordinate;
+extern unsigned long elementarraysize;
 
 // External Functions //
 
 // From structs //
-extern int get_point_hash_depth(unsigned long hash);
-extern double get_point_x_coord(unsigned long hash, int depth);
-extern double get_point_y_coord(unsigned long hash, int depth);
-extern char *get_point_name(unsigned long hash, int depth);
-extern void dump_nearest_neighbor(double x, double y);
-extern char *get_element_name(unsigned long index);
-extern double get_element_x(unsigned long index);
-extern double get_element_y(unsigned long index);
-extern double get_element_width(unsigned long index);
-extern double get_element_height(unsigned long index);
-extern int get_element_type(unsigned long index);
+extern void dump_nearest_neighbor(double, double);
+extern char *get_element_name(unsigned long);
+extern double get_element_x(unsigned long);
+extern double get_element_y(unsigned long);
+extern double get_element_width(unsigned long);
+extern double get_element_height(unsigned long);
+extern int get_element_type(unsigned long);

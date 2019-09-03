@@ -1,7 +1,10 @@
 #include "io.h"
 
 // *** parse_points_file *** //
-// Parse through the file that has the points and store them //
+// Parse a file containing points and store them. //
+// -----------------------------------------------//
+// The file elements have the following format:   //
+//     <Name>  <Type>  <X-coord>  <Y-coord>       //
 void parse_points_file(FILE *fp)
 {
   char *line = NULL;           // The string of the line //
@@ -9,17 +12,17 @@ void parse_points_file(FILE *fp)
   char *name = NULL;           // The name of the point //
   size_t length = 0;           // The length of the line //
   double x, y;                 // The x, y coordinates of the point //
-  unsigned long noofLines = 0; // The number of lines of the file //
+  unsigned long nooflines = 0; // The number of lines of the file //
 
   // First Pass //
   // Get the number of lines of the file //
   while (getline(&line, &length, fp) != -1)
     {
-      noofLines++;
+      nooflines++;
     }
 
   // Initialize the array //
-  init_element_array(noofLines);
+  init_element_array(nooflines);
 
   // Revert the file pointer to the start of the file //
   rewind(fp);
@@ -43,9 +46,10 @@ void parse_points_file(FILE *fp)
       assert(token != NULL);
 
       x = atof(token);
-      if (isgreater(x, pointMaxXCoordinate) == 1)
+      // Check if element's x coordinate exceed the max one //
+      if (isgreater(x, elementmaxxcoordinate) == 1)
         {
-          pointMaxXCoordinate = x;
+          elementmaxxcoordinate = x;
         }
 
       // Third token - Y-coordinate //
@@ -53,9 +57,10 @@ void parse_points_file(FILE *fp)
       assert(token != NULL);
 
       y = atof(token);
-      if (isgreater(y, pointMaxYCoordinate) == 1)
+      // Check if element's y coordinate exceed the max one //
+      if (isgreater(y, elementmaxycoordinate) == 1)
         {
-          pointMaxYCoordinate = y;
+          elementmaxycoordinate = y;
         }
 
       // Syntax checking //
@@ -63,13 +68,19 @@ void parse_points_file(FILE *fp)
       assert(token == NULL);
       
       // Store point to the array //
-      insert_point(name, x, y);
+      // The -1 indicates that the inserted element is a point with the following 0s its width and height //
+      insert_element(name, x, y, -1, 0, 0);
     }
 
   // The last line needs to be freed //
   free(line);
 }
 
+// *** parse_drawbuffer_output_file *** //
+// Parse the output file created from the ASP Tool and store its elements. //
+// ------------------------------------------------------------------------//
+// The file elements have the following format:                            //
+//     <Name>  <Type>  <X-coord>  <Y-coord>  <Width>  <Height>             //
 void parse_drawbuffer_output_file(FILE *fp)
 {
   char *line = NULL;           // The string of the line //
@@ -79,17 +90,17 @@ void parse_drawbuffer_output_file(FILE *fp)
   int type;                    // The type of the element //
   double x, y;                 // The x & y coordinates of the element //
   double width, height;        // The width & height of the element //
-  unsigned long noofLines = 0; // The number of lines of the file //
+  unsigned long nooflines = 0; // The number of lines of the file //
 
   // First Pass //
   // Get the number of lines of the file //
   while (getline(&line, &length, fp) != -1)
     {
-      noofLines++;
+      nooflines++;
     }
 
   // Initialize the array //
-  init_element_array(noofLines);
+  init_element_array(nooflines);
 
   // Revert the file pointer to the start of the file //
   rewind(fp);
@@ -131,9 +142,10 @@ void parse_drawbuffer_output_file(FILE *fp)
       assert(token != NULL);
 
       width = atof(token);
-      if (isgreater((x + width), pointMaxXCoordinate) == 1)
+      // Check if element's right side exceed the max x coordinate //
+      if (isgreater((x + width), elementmaxxcoordinate) == 1)
         {
-          pointMaxXCoordinate = x + width;
+          elementmaxxcoordinate = x + width;
         }
 
       // Sixth token - Height //
@@ -141,9 +153,10 @@ void parse_drawbuffer_output_file(FILE *fp)
       assert(token != NULL);
 
       height = atof(token);
-      if (isgreater((y + height), pointMaxYCoordinate) == 1)
+      // Check if element's bottom side exceed the max y coordinate //
+      if (isgreater((y + height), elementmaxycoordinate) == 1)
         {
-          pointMaxYCoordinate = y + height;
+          elementmaxycoordinate = y + height;
         }
 
       // Syntax checking //

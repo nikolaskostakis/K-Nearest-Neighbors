@@ -8,40 +8,42 @@
 
 void init_tcl(char *argv[]);
 
-int less(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int cat(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
+int less(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int cat(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
 
-int read_points(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int print_element_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int create_kdTree(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int print_kdTree(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int find_NN(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int clear_elements(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int find_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int find_K_nearest_neighbours(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int find_neighbours_within_radius(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int print_sorting_array(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
-int read_drawbuffer_output(ClientData clientdata, Tcl_Interp *interp, int argc, Tcl_Obj *const argv[]);
+int read_points(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int print_element_array(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int create_kdTree(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int print_kdTree(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int find_NN(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int clear_elements(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int find_nearest_neighbors(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int find_K_nearest_neighbors(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int find_neighbors_within_radius(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int print_sorting_array(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+int read_drawbuffer_output(ClientData, Tcl_Interp *, int, Tcl_Obj *const*);
+
+// External Variables //
+
+// From structs //
+extern unsigned long elementarraysize;
+extern unsigned long kdtreearraysize;
 
 // External Functions //
 
 // From io //
-extern void parse_points_file(FILE *fp);
-extern void parse_drawbuffer_output_file(FILE *fp);
+extern void parse_points_file(FILE *);
+extern void parse_drawbuffer_output_file(FILE *);
 
 // From structs //
 extern void dump_element_array();
 extern void free_element_array();
-
 extern void create_KD_tree();
 extern void dump_KD_tree();
 extern void free_KD_tree();
-
 extern void dump_sorting_array();
 extern void free_sorting_array();
-
-extern void dump_nearest_neighbor(double x, double y);
-extern void dump_nearest_neighbours_within_radius(double x, double y, double range);
-extern void dump_k_nearest_neighbours(double x, double y, unsigned long k);
-
-extern void dump_element_distances(double x, double y);
+extern void dump_nearest_neighbor(double, double);
+extern void dump_nearest_neighbors_within_radius(double, double, double);
+extern void dump_k_nearest_neighbors(double, double, unsigned long);
+extern void dump_element_distances(double, double);

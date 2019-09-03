@@ -7,6 +7,6 @@
 
 void init_readline();
 
-char **custom_completion(const char *text, int start, int end);
+char **custom_completion(const char *, int, int);
 
-char *custom_completer(const char * text, int state);
+char *custom_completer(const char * , int);
